@@ -1,0 +1,18 @@
+{
+  "replace": false,
+  "values": [
+    "#saplings",
+    "#flowers",
+    "#tall_flowers",
+    "#crops",
+    "#buttons",
+    "#trapdoors",
+    "#coral_plants",
+    "vine",
+    "tripwire",
+    "tripwire_hook",
+    "sugar_cane",
+    "lily_pad",
+    "tall_grass"
+  ]
+}

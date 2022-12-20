@@ -1,0 +1,21 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "me.qboi.mods.err422.mixin.common",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "ShapedRecipeMixin"
+  ],
+  "client": [
+    "AbstractWidgetMixin",
+    "GuiMixin",
+    "ImageButtonMixin",
+    "KeyMappingAccessor",
+    "LoadingOverlayAccessor",
+    "LogoTextureMixin",
+    "TitleScreenMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "glitch": {
+    "category": "master",
+    "sounds": [
+      "error422:g"
+    ]
+  },
+  "glitch422": {
+    "category": "master",
+    "sounds": [
+      "error422:g422"
+    ]
+  }
+}
