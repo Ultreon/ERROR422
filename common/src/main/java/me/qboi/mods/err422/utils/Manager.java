@@ -36,7 +36,6 @@ public class Manager {
     public static float glitchXRot;
     public static float glitchYRot;
     public static boolean glitchActive;
-    public static String[] validBlockReplacements = "oak_sapling tall_grass air #flower tile.rose tile.mushroom tile.crops tile.ladder tile.button tile.reeds tile.litpumpkin tile.trapdoor tile.vine tile.waterlily tile.tripWireSource tile.tripWire".split(" ");
     public static ServerLevel world;
     public static ServerPlayer affectedPlayer;
     public static String randomizedMcVersion = String.format("1.%s.%s", numbers[GameRNG.nextInt(numbers.length)], numbers[GameRNG.nextInt(numbers.length)]);
