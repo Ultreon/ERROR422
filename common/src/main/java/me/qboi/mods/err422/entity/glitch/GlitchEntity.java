@@ -46,9 +46,9 @@ public class GlitchEntity extends PathfinderMob {
         super(type, world);
 //        this.texture = "422.png";
         this.attackType = Manager.attackType;
-        this.setLastHurtMob(Manager.player);
-        Manager.glitchXRot = Manager.player.getXRot();
-        Manager.glitchYRot = Manager.player.getYRot();
+        this.setLastHurtMob(Manager.affectedPlayer);
+        Manager.glitchXRot = Manager.affectedPlayer.getXRot();
+        Manager.glitchYRot = Manager.affectedPlayer.getYRot();
 //        Utils.minecraft.options.anaglyph = true; // TODO: Use glitch shader from Kelvin285.
         if (Manager.attackType == GlitchAttackType.ATTACKER) {
             this.disappearTicks = EventHandler.getInstance().ticks + TimeUtils.minutesToTicks(1);
@@ -201,7 +201,7 @@ public class GlitchEntity extends PathfinderMob {
 
     public void tick() {
         super.tick();
-        if (Manager.player.isDeadOrDying()) {
+        if (Manager.affectedPlayer.isDeadOrDying()) {
             this.disappear();
         } else {
             Manager.attackType = this.attackType;
@@ -236,7 +236,7 @@ public class GlitchEntity extends PathfinderMob {
         this.setSpeed(0.3f);
         this.flyingSpeed = 0.15f;
         Objects.requireNonNull(getAttributes().getInstance(Attributes.ATTACK_DAMAGE), "Attack damage not present").setBaseValue(Double.MAX_VALUE);
-        if (this.getY() < Manager.player.getY() && Manager.attackType != GlitchAttackType.CRASHER) {
+        if (this.getY() < Manager.affectedPlayer.getY() && Manager.attackType != GlitchAttackType.CRASHER) {
             this.setPos(this.getX(), this.getY() + 2.0, this.getZ());
         }
         final int method2311 = Mth.floor(this.getX());
@@ -269,7 +269,7 @@ public class GlitchEntity extends PathfinderMob {
         this.setHealth(0);
         discard();
         if (DebugUtils.enabled) {
-            Manager.player.sendSystemMessage(Component.literal("ERR422 is disappeared."));
+            Manager.affectedPlayer.sendSystemMessage(Component.literal("ERR422 is disappeared."));
         }
     }
 
