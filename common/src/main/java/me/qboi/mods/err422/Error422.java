@@ -29,7 +29,7 @@ public class Error422 {
         TickEvent.SERVER_POST.register(server -> EventTicker.getInstance().tick());
         ChatEvent.RECEIVED.register((player, component) -> EventResult.interrupt(!DebugUtils.handleCheatCode(component.getString())));
         PlayerEvent.PLAYER_JOIN.register(player -> {
-            Manager.affectedPlayer = player;
+            Manager.selectLastPlayer();
             Manager.world = player.getLevel();
         });
         PlayerEvent.PLAYER_QUIT.register(player -> {
