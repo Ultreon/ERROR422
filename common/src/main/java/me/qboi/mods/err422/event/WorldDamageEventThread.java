@@ -18,9 +18,9 @@ class WorldDamageEventThread extends Thread {
 
     @Override
     public void run() {
-        int x = Mth.floor(Manager.player.getX() + 18.0);
-        int y = Mth.floor(Manager.player.getY() + 10.0);
-        int z = Mth.floor(Manager.player.getZ() + 18.0);
+        int x = Mth.floor(Manager.affectedPlayer.getX() + 18.0);
+        int y = Mth.floor(Manager.affectedPlayer.getY() + 10.0);
+        int z = Mth.floor(Manager.affectedPlayer.getZ() + 18.0);
         //noinspection unused
         Block fakeLogRef = Blocks.OAK_PLANKS;
         final int n5 = 36;

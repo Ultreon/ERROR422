@@ -14,7 +14,6 @@ public class AntiGamemode {
 
         MultiPlayerGameMode gameMode = Manager.minecraft.gameMode;
         if (gameMode != null && gameMode.getPlayerMode() != GameType.SURVIVAL) {
-            System.out.println("gameMode.getPlayerMode() = " + gameMode.getPlayerMode());
             Manager.onCrash();
         }
     }

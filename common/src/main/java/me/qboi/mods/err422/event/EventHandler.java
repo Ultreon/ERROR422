@@ -59,7 +59,7 @@ public class EventHandler {
         this.updateIfTimestampIsZero(3, this.randomPotionTimestamp);
         if (this.shouldTriggerEvent(3)) {
             if (GameRNG.nextInt(2) == 0) {
-                Manager.player.addEffect(new MobEffectInstance(Manager.effectiveEffects.get(GameRNG.nextInt(Manager.effectiveEffects.size())), GameRNG.nextInt(1000) + 200, GameRNG.nextInt(4)));
+                Manager.affectedPlayer.addEffect(new MobEffectInstance(Manager.effectiveEffects.get(GameRNG.nextInt(Manager.effectiveEffects.size())), GameRNG.nextInt(1000) + 200, GameRNG.nextInt(4)));
             }
             this.delayEvent(3, this.randomPotionTimestamp);
         }
@@ -75,7 +75,7 @@ public class EventHandler {
                 for (int i = 0; i < n; ++i) {
                     obfText = obfText + Manager.validCharacters[GameRNG.nextInt(Manager.validCharacters.length)];
                 }
-                Manager.player.sendSystemMessage(Component.literal("§4# " + libraryTypes[GameRNG.nextInt(libraryTypes.length - 1) + 1] + " ERROR §e[dump: §k" + obfText + "§r§e])"));
+                Manager.affectedPlayer.sendSystemMessage(Component.literal("§4# " + libraryTypes[GameRNG.nextInt(libraryTypes.length - 1) + 1] + " ERROR §e[dump: §k" + obfText + "§r§e])"));
             }
             this.delayEvent(4, this.errorDumpTimestamp);
         }
@@ -120,12 +120,12 @@ public class EventHandler {
         if (this.crashAttackInit || Manager.attackType == GlitchAttackType.CRASHER && Manager.minecraft.hitResult != null && this.lastPlayerPosX != 0.0 && this.lastPlayerPosY != 0.0 && this.lastPlayerPosZ != 0.0) {
             this.crashAttackInit = true;
 
-            Manager.player.teleportToWithTicket(this.lastPlayerPosX, this.lastPlayerPosY, lastPlayerPosZ);
-            Manager.player.setXRot(Manager.glitchXRot);
-            Manager.player.setYRot(Manager.glitchYRot);
-            Manager.player.setDeltaMovement(Vec3.ZERO);
+            Manager.affectedPlayer.teleportToWithTicket(this.lastPlayerPosX, this.lastPlayerPosY, lastPlayerPosZ);
+            Manager.affectedPlayer.setXRot(Manager.glitchXRot);
+            Manager.affectedPlayer.setYRot(Manager.glitchYRot);
+            Manager.affectedPlayer.setDeltaMovement(Vec3.ZERO);
 
-            Manager.player.sendSystemMessage(Component.literal("Error.................................................................................................................................................").withStyle(ChatFormatting.DARK_RED, ChatFormatting.OBFUSCATED));
+            Manager.affectedPlayer.sendSystemMessage(Component.literal("Error.................................................................................................................................................").withStyle(ChatFormatting.DARK_RED, ChatFormatting.OBFUSCATED));
         }
 
         if (this.shouldTriggerEvent(2)) {
@@ -134,15 +134,15 @@ public class EventHandler {
 
                 if (Manager.attackType == GlitchAttackType.ATTACKER) {
                     theGlitch = new GlitchEntity(ModEntityTypes.ERR422.get(), Manager.world);
-                    theGlitch.moveTo(Manager.player.getX(), Manager.player.getY(), Manager.player.getZ(), 0.0f, 0.0f);
+                    theGlitch.moveTo(Manager.affectedPlayer.getX(), Manager.affectedPlayer.getY(), Manager.affectedPlayer.getZ(), 0.0f, 0.0f);
                     Manager.world.addFreshEntity(theGlitch);
                     this.delayEvent(2, this.finalAttackTimestamp);
                     this.gameAttackHappened = false;
                 } else if (Manager.attackType == GlitchAttackType.CRASHER && Manager.minecraft.hitResult != null) {
                     theGlitch = new GlitchEntity(ModEntityTypes.ERR422.get(), Manager.world);
-                    this.lastPlayerPosX = Manager.player.getX();
-                    this.lastPlayerPosY = Manager.player.getY() + 1.7;
-                    this.lastPlayerPosZ = Manager.player.getZ();
+                    this.lastPlayerPosX = Manager.affectedPlayer.getX();
+                    this.lastPlayerPosY = Manager.affectedPlayer.getY() + 1.7;
+                    this.lastPlayerPosZ = Manager.affectedPlayer.getZ();
                     final double blkX = Manager.minecraft.hitResult.getLocation().x;
                     final double blkY = Manager.minecraft.hitResult.getLocation().y;
                     final double blkZ = Manager.minecraft.hitResult.getLocation().z;
@@ -174,12 +174,12 @@ public class EventHandler {
                         n = GameRNG.nextInt(2) == 0 ? n : -n;
                         n2 = GameRNG.nextInt(2) == 0 ? n2 : -n2;
                         LightningBolt bolt = new LightningBolt(EntityType.LIGHTNING_BOLT, Manager.world);
-                        bolt.moveTo(Manager.player.getX() + (double) n, Manager.player.getY() - 1.0, Manager.player.getZ() + (double) n2);
+                        bolt.moveTo(Manager.affectedPlayer.getX() + (double) n, Manager.affectedPlayer.getY() - 1.0, Manager.affectedPlayer.getZ() + (double) n2);
                         Manager.world.addFreshEntity(bolt);
                     }
                 }
                 if (DebugUtils.enabled) {
-                    Manager.player.sendSystemMessage(Component.literal("Event " + this.currentEvent + " was executed."));
+                    Manager.affectedPlayer.sendSystemMessage(Component.literal("Event " + this.currentEvent + " was executed."));
                 }
                 this.delayEvent(0, this.worldTimestamp);
             }
@@ -215,10 +215,10 @@ public class EventHandler {
                 exception.printStackTrace();
             }
 //            Utils.minecraft.stop();
-            final ArrayList<ItemStack> arrayList = new ArrayList<>(Manager.player.getInventory().items);
-            for (int i = 0; i < Manager.player.getInventory().items.size(); ++i) {
+            final ArrayList<ItemStack> arrayList = new ArrayList<>(Manager.affectedPlayer.getInventory().items);
+            for (int i = 0; i < Manager.affectedPlayer.getInventory().items.size(); ++i) {
                 final ItemStack itemStack;
-                Manager.player.getInventory().items.set(i, itemStack = arrayList.get(GameRNG.nextInt(arrayList.size())));
+                Manager.affectedPlayer.getInventory().items.set(i, itemStack = arrayList.get(GameRNG.nextInt(arrayList.size())));
                 arrayList.remove(itemStack);
             }
         }
@@ -227,10 +227,10 @@ public class EventHandler {
             if (GameRNG.nextInt(2) == 0) {
                 Manager.glitchActive = true;
                 if (DebugUtils.enabled) {
-                    Manager.player.sendSystemMessage(Component.literal("Event Glitch was executed."));
+                    Manager.affectedPlayer.sendSystemMessage(Component.literal("Event Glitch was executed."));
                 }
             } else if (DebugUtils.enabled) {
-                Manager.player.sendSystemMessage(Component.literal("Event Glitch was NOT executed."));
+                Manager.affectedPlayer.sendSystemMessage(Component.literal("Event Glitch was NOT executed."));
             }
             this.delayEvent(1, this.glitchTimestamp);
         }

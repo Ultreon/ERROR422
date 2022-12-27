@@ -22,8 +22,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
-import javax.swing.text.Document;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class Manager {
@@ -38,7 +38,7 @@ public class Manager {
     public static boolean glitchActive;
     public static String[] validBlockReplacements = "oak_sapling tall_grass air #flower tile.rose tile.mushroom tile.crops tile.ladder tile.button tile.reeds tile.litpumpkin tile.trapdoor tile.vine tile.waterlily tile.tripWireSource tile.tripWire".split(" ");
     public static ServerLevel world;
-    public static ServerPlayer player;
+    public static ServerPlayer affectedPlayer;
     public static String randomizedMcVersion = String.format("1.%s.%s", numbers[GameRNG.nextInt(numbers.length)], numbers[GameRNG.nextInt(numbers.length)]);
     public static GlitchAttackType attackType;
     public static ItemStack recipeReplacement;
@@ -91,13 +91,11 @@ public class Manager {
         return replacementBlocks.get(GameRNG.nextInt(replacementBlocks.size()));
     }
 
-    public static void Method2200() {
-        for (final ServerLevel worldServer : ServerLifecycle.getCurrentServer().getAllLevels()) {
-            if (0 == worldServer.players().size()) continue;
-            world = worldServer;
-            for (final ServerPlayer e : worldServer.players()) {
-                player = e;
-            }
+    public static void selectLastPlayer() {
+        List<ServerPlayer> players = ServerLifecycle.getCurrentServer().getPlayerList().getPlayers();
+        if (players.size() == 0) return;
+        for (final ServerPlayer player : players) {
+            affectedPlayer = player;
         }
     }
 }

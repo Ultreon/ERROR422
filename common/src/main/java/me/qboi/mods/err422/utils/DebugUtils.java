@@ -32,7 +32,7 @@ public class DebugUtils {
 
             // Stands for CReative
             case "~cr" -> {
-                Manager.player.setGameMode(GameType.CREATIVE);
+                Manager.affectedPlayer.setGameMode(GameType.CREATIVE);
                 return true;
             }
 
