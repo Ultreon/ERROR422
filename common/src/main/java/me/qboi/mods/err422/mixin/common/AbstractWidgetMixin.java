@@ -40,7 +40,7 @@ public abstract class AbstractWidgetMixin extends GuiComponent implements Widget
 
     @Shadow public abstract Component getMessage();
 
-    private final Color err422$randomColor = new Color(GameRNG.nextInt(140), GameRNG.nextInt(110), GameRNG.nextInt(110));  // Original name: Field5642
+    private final Color err422$randomColor = new Color(GameRNG.nextInt(140), GameRNG.nextInt(110), GameRNG.nextInt(110));
 
     /**
      * @author Qboi123

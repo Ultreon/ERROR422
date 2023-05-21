@@ -14,6 +14,7 @@ import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffect;
@@ -96,6 +97,10 @@ public class Manager {
         for (final ServerPlayer player : players) {
             affectedPlayer = player;
         }
+    }
+
+    public static void logAffected(String message) {
+        affectedPlayer.sendSystemMessage(Component.literal(message));
     }
 }
 

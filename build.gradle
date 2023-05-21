@@ -16,10 +16,16 @@ subprojects {
 
     repositories {
         maven {
+            name "Jitpack"
             url "https://cursemaven.com"
             content {
                 includeGroup "curse.maven"
             }
+        }
+
+        maven {
+            name "Jitpack"
+            url "https://jitpack.io"
         }
 
         flatDir {

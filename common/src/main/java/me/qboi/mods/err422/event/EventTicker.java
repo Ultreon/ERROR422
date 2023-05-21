@@ -6,20 +6,20 @@ import me.qboi.mods.err422.utils.Manager;
 
 public class EventTicker {
     public static EventTicker instance = new EventTicker();
-    private int Field3544;
+    private int glitchTicker;
 
     public void tick() {
         AntiGamemode.checkGamemode();
         PlayerIdleDetector.tick();
-        ++EventHandler.getInstance().ticks;
-        if (this.Field3544 >= 250) {
+        ++EventHandler.get().ticks;
+        if (this.glitchTicker >= 250) {
             Manager.glitchActive = false;
-            this.Field3544 = 0;
+            this.glitchTicker = 0;
         }
         if (Manager.glitchActive) {
-            ++this.Field3544;
+            ++this.glitchTicker;
         }
-        EventHandler.getInstance().delayEvent();
+        EventHandler.get().delayEvent();
     }
 
     public static EventTicker getInstance() {

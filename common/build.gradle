@@ -6,6 +6,7 @@ dependencies {
     modApi "dev.architectury:architectury:${rootProject.architectury_version}"
 
     modApi "com.ultreon.mods:ultreon-lib:1.1.0"
+    modApi 'com.github.Ultreon.advanced-debug:advanced-debug:9b626785f7'
 }
 
 architectury {

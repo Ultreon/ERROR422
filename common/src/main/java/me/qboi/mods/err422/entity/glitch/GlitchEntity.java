@@ -51,10 +51,10 @@ public class GlitchEntity extends PathfinderMob {
         Manager.glitchYRot = Manager.affectedPlayer.getYRot();
 //        Utils.minecraft.options.anaglyph = true; // TODO: Use glitch shader from Kelvin285.
         if (Manager.attackType == GlitchAttackType.ATTACKER) {
-            this.disappearTicks = EventHandler.getInstance().ticks + TimeUtils.minutesToTicks(1);
+            this.disappearTicks = EventHandler.get().ticks + TimeUtils.minutesToTicks(1);
         } else if (Manager.attackType == GlitchAttackType.CRASHER) {
             Manager.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(ModSounds.GLITCH422.get(), 100, 0.0f));
-            this.disappearTicks = (long) EventHandler.getInstance().ticks + 80L;
+            this.disappearTicks = (long) EventHandler.get().ticks + 80L;
         }
     }
 
@@ -218,7 +218,7 @@ public class GlitchEntity extends PathfinderMob {
         switch (Manager.attackType) {
             case CRASHER -> {
                 this.setDeltaMovement(0.0, 0.0, 0.0);
-                if (EventHandler.getInstance().ticks >= this.disappearTicks) {
+                if (EventHandler.get().ticks >= this.disappearTicks) {
                     Manager.onCrash();
                 }
                 this.setPos(this.stayX, this.stayY, this.stayZ);
@@ -228,7 +228,7 @@ public class GlitchEntity extends PathfinderMob {
                 if (Manager.glitchSound != null && !soundManager.isActive(Manager.glitchSound)) {
                     Manager.glitchSound = SimpleSoundInstance.forUI(ModSounds.GLITCH422.get(), 100f, 0f);
                 }
-                if (EventHandler.getInstance().ticks >= this.disappearTicks) {
+                if (EventHandler.get().ticks >= this.disappearTicks) {
                     this.disappear();
                 }
             }

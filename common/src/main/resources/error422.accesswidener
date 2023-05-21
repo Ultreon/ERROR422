@@ -3,4 +3,4 @@ mutable field net/minecraft/client/gui/screens/LoadingOverlay LOGO_BACKGROUND_CO
 mutable field net/minecraft/client/gui/screens/LoadingOverlay LOGO_BACKGROUND_COLOR_DARK I
 accessible class net/minecraft/client/gui/screens/LoadingOverlay$LogoTexture
 accessible class net/minecraft/client/gui/screens/TitleScreen$WarningLabel
-accessible class net/minecraft/client/gui/Gui/HeartType
+accessible class net/minecraft/client/gui/Gui$HeartType

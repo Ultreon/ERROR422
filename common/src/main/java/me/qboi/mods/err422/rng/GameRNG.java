@@ -11,5 +11,9 @@ public class GameRNG {
     public static int nextInt(int n) {
         return random.nextInt(n);
     }
+
+    public static boolean chance(int n) {
+        return random.nextInt(n) == 0;
+    }
 }
 

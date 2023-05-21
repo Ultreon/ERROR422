@@ -30,7 +30,7 @@ public abstract class ImageButtonMixin extends AbstractWidget {
     @Shadow @Final private ResourceLocation resourceLocation;
     @Shadow @Final private int textureWidth;
     @Shadow @Final private int textureHeight;
-    private final Color err422$randomColor = new Color(GameRNG.nextInt(140), GameRNG.nextInt(110), GameRNG.nextInt(110));  // Original name: Field5642
+    private final Color err422$randomColor = new Color(GameRNG.nextInt(140), GameRNG.nextInt(110), GameRNG.nextInt(110));
 
     public ImageButtonMixin(int i, int j, int k, int l, Component component) {
         super(i, j, k, l, component);

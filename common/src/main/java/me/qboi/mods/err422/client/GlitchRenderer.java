@@ -11,10 +11,10 @@ import java.util.ArrayList;
 
 public class GlitchRenderer {
     private int ticks;
-    private final ArrayList<String> chars = new ArrayList<>();  // Original name: Field4280
-    private final IntArrayList colors = new IntArrayList();  // Original name: Field4281
-    private int width;  // Original name: Field4279
-    private int height;  // Original name: Field4282
+    private final ArrayList<String> chars = new ArrayList<>();
+    private final IntArrayList colors = new IntArrayList();
+    private int width;
+    private int height;
 
     public void render(PoseStack poseStack) {
         if (ticks == 13) {
@@ -38,9 +38,6 @@ public class GlitchRenderer {
         }
     }
 
-    /**
-     * Original name: Method3261
-     */
     public void reset() {
         chars.clear();
         colors.clear();

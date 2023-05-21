@@ -26,7 +26,7 @@ public class DebugUtils {
         switch (commandLine[0]) {
             // Stands for Skip
             case "~s" -> {
-                EventHandler.getInstance().ticks += TimeUtils.minutesToTicks(10);
+                EventHandler.get().ticks += TimeUtils.minutesToTicks(10);
                 return true;
             }
 

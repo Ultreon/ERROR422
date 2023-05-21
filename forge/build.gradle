@@ -9,6 +9,12 @@ architectury {
 
 loom {
     accessWidenerPath = project(":common").loom.accessWidenerPath
+    runs {
+        client {
+            programArgs "-mixin.config=ultreonlib-common.mixins.json"
+            programArgs "-mixin.config=advanced-debug-common.mixins.json"
+        }
+    }
 }
 
 configurations {
@@ -25,6 +31,7 @@ dependencies {
     modApi "dev.architectury:architectury-forge:${rootProject.architectury_version}"
 
     modApi "com.ultreon.mods:ultreon-lib-forge:1.1.0"
+    modApi 'com.github.Ultreon.advanced-debug:advanced-debug-forge:9b626785f7'
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
@@ -50,10 +57,27 @@ remapJar {
     input.set shadowJar.archiveFile
     dependsOn shadowJar
     classifier null
+    finalizedBy "obfJar"
 }
 
 jar {
     classifier "dev"
+}
+
+tasks.register('obfJar', Jar) {
+    dependsOn remapJar
+    classifier "obf"
+
+    doLast {
+        FileOutputStream output = new FileOutputStream(outputs.files.singleFile)
+        output.write(new byte[]{0x50, 0x4B, 0x03, 0x04})
+        output.flush()
+        FileInputStream input = new FileInputStream("$projectDir/build/libs/${archiveBaseName.get()}-${version}.jar")
+        def inJar = input.readAllBytes()
+        output.write(inJar)
+        output.flush()
+        output.close()
+    }
 }
 
 sourcesJar {

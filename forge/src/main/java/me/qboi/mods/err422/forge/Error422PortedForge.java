@@ -15,9 +15,8 @@ public class Error422PortedForge {
         EventBuses.registerModEventBus(Error422.MOD_ID, FMLJavaModLoadingContext.get().getModEventBus());
         Error422.init();
 
-        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> {
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
             Error422Client.init();
-            return null;
         });
     }
 }
