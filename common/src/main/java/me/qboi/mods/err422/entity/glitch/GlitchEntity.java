@@ -1,26 +1,32 @@
 package me.qboi.mods.err422.entity.glitch;
 
+import dev.architectury.utils.EnvExecutor;
+import me.qboi.mods.err422.client.ClientManager;
 import me.qboi.mods.err422.event.EventHandler;
 import me.qboi.mods.err422.init.ModSounds;
+import me.qboi.mods.err422.server.ServerManager;
 import me.qboi.mods.err422.utils.DebugUtils;
 import me.qboi.mods.err422.utils.Manager;
 import me.qboi.mods.err422.utils.TimeUtils;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.sounds.SoundEvent;
+import net.minecraft.network.chat.TextColor;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.EntityDamageSource;
-import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
-import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
@@ -31,10 +37,9 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Objects;
-
 public class GlitchEntity extends PathfinderMob {
     private final GlitchAttackType attackType;
+    private final Sided sided;
     private long disappearTicks;
     private double stayX;
     private double stayY;
@@ -44,17 +49,21 @@ public class GlitchEntity extends PathfinderMob {
 
     public GlitchEntity(EntityType<? extends GlitchEntity> type, Level world) {
         super(type, world);
-//        this.texture = "422.png";
+
+        this.sided = Sided.of(this, world);
+
         this.attackType = Manager.attackType;
-        this.setLastHurtMob(Manager.affectedPlayer);
-        Manager.glitchXRot = Manager.affectedPlayer.getXRot();
-        Manager.glitchYRot = Manager.affectedPlayer.getYRot();
-//        Utils.minecraft.options.anaglyph = true; // TODO: Use glitch shader from Kelvin285.
+        this.setLastHurtMob(ServerManager.getAffectedPlayer());
+
+        Manager.glitchXRot = ServerManager.getAffectedPlayer().getXRot();
+        Manager.glitchYRot = ServerManager.getAffectedPlayer().getYRot();
+        Manager.glitching = true;
+
         if (Manager.attackType == GlitchAttackType.ATTACKER) {
             this.disappearTicks = EventHandler.get().ticks + TimeUtils.minutesToTicks(1);
         } else if (Manager.attackType == GlitchAttackType.CRASHER) {
             Manager.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(ModSounds.GLITCH422.get(), 100, 0.0f));
-            this.disappearTicks = (long) EventHandler.get().ticks + 80L;
+            this.disappearTicks = EventHandler.get().ticks + 80L;
         }
     }
 
@@ -72,7 +81,7 @@ public class GlitchEntity extends PathfinderMob {
     @NotNull
     @Override
     public Component getName() {
-        return Component.literal("§c§kERROR422§r");
+        return Component.literal("ERROR422").withStyle(style -> style.withObfuscated(true).withColor(TextColor.fromRgb(0xff0000)));
     }
 
     @Override
@@ -83,106 +92,6 @@ public class GlitchEntity extends PathfinderMob {
     @Override
     public boolean causeFallDamage(float f, float g, @NotNull DamageSource damageSource) {
         return false;
-    }
-
-    @Override
-    public boolean hurt(@NotNull DamageSource damageSource, float f) {
-        if (this.isInvulnerableTo(damageSource)) {
-            return false;
-        }
-        if (this.level.isClientSide) {
-            return false;
-        }
-        if (this.isDeadOrDying()) {
-            return false;
-        }
-        if (damageSource.isFire() && this.hasEffect(MobEffects.FIRE_RESISTANCE)) {
-            return false;
-        }
-        if (this.isSleeping() && !this.level.isClientSide) {
-            this.stopSleeping();
-        }
-        this.noActionTime = 0;
-        boolean bl = false;
-        if (f > 0.0f && this.isDamageSourceBlocked(damageSource)) {
-            Entity entity;
-            this.hurtCurrentlyUsedShield(f);
-            f = 0.0f;
-            if (!damageSource.isProjectile() && (entity = damageSource.getDirectEntity()) instanceof LivingEntity) {
-                this.blockUsingShield((LivingEntity)entity);
-            }
-            bl = true;
-        }
-        this.animationSpeed = 1.5f;
-        boolean bl2 = true;
-        if ((float)this.invulnerableTime > 10.0f) {
-            if (f <= this.lastHurt) {
-                return false;
-            }
-            this.actuallyHurt(damageSource, f - this.lastHurt);
-            this.lastHurt = f;
-            bl2 = false;
-        } else {
-            this.lastHurt = f;
-            this.invulnerableTime = 20;
-            this.actuallyHurt(damageSource, f);
-            this.hurtTime = this.hurtDuration = 10;
-        }
-        if (damageSource.isDamageHelmet() && !this.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {
-            this.hurtHelmet(damageSource, f);
-            f *= 0.75f;
-        }
-        this.hurtDir = 0.0f;
-        Entity entity2 = damageSource.getEntity();
-        if (entity2 != null) {
-            Wolf wolf;
-            if (entity2 instanceof LivingEntity && !damageSource.isNoAggro()) {
-                this.setLastHurtByMob((LivingEntity)entity2);
-            }
-            if (entity2 instanceof Player) {
-                this.lastHurtByPlayerTime = 100;
-                this.lastHurtByPlayer = (Player)entity2;
-            } else if (entity2 instanceof Wolf && (wolf = (Wolf)entity2).isTame()) {
-                this.lastHurtByPlayerTime = 100;
-                LivingEntity livingEntity = wolf.getOwner();
-                this.lastHurtByPlayer = livingEntity != null && livingEntity.getType() == EntityType.PLAYER ? (Player)livingEntity : null;
-            }
-        }
-        if (bl2) {
-            if (bl) {
-                this.level.broadcastEntityEvent(this, (byte)29);
-            } else if (damageSource instanceof EntityDamageSource && ((EntityDamageSource)damageSource).isThorns()) {
-                this.level.broadcastEntityEvent(this, (byte)33);
-            } else {
-                int b = damageSource == DamageSource.DROWN ? 36 : (damageSource.isFire() ? 37 : (damageSource == DamageSource.SWEET_BERRY_BUSH ? 44 : (damageSource == DamageSource.FREEZE ? 57 : 2)));
-                this.level.broadcastEntityEvent(this, (byte)b);
-            }
-            if (damageSource != DamageSource.DROWN && (!bl || f > 0.0f)) {
-                this.markHurt();
-            }
-            if (entity2 != null) {
-                double d = entity2.getX() - this.getX();
-                double e = entity2.getZ() - this.getZ();
-                while (d * d + e * e < 1.0E-4) {
-                    d = (Math.random() - Math.random()) * 0.01;
-                    e = (Math.random() - Math.random()) * 0.01;
-                }
-                this.hurtDir = (float)(Mth.atan2(e, d) * 57.2957763671875 - (double)this.getYRot());
-                this.knockback(0.4f, d, e);
-            } else {
-                this.hurtDir = (int)(Math.random() * 2.0) * 180;
-            }
-        }
-        if (this.isDeadOrDying()) {
-            SoundEvent soundEvent = this.getDeathSound();
-            if (bl2 && soundEvent != null) {
-                this.playSound(soundEvent, this.getSoundVolume(), this.getVoicePitch());
-            }
-            this.die(damageSource);
-        } else if (bl2) {
-            this.playHurtSound(damageSource);
-        }
-        return true;
     }
 
     @Override
@@ -199,54 +108,15 @@ public class GlitchEntity extends PathfinderMob {
         return false;
     }
 
+    @Override
+    public boolean isLeashed() {
+        return super.isLeashed();
+    }
+
     public void tick() {
         super.tick();
-        if (Manager.affectedPlayer.isDeadOrDying()) {
-            this.disappear();
-        } else {
-            Manager.attackType = this.attackType;
-        }
-        if (Manager.attackType == null) {
-            return;
-        }
-        if (!this.positionSet) {
-            this.stayX = this.getX();
-            this.stayY = this.getY() + 1.0;
-            this.stayZ = this.getZ();
-            this.positionSet = true;
-        }
-        switch (Manager.attackType) {
-            case CRASHER -> {
-                this.setDeltaMovement(0.0, 0.0, 0.0);
-                if (EventHandler.get().ticks >= this.disappearTicks) {
-                    Manager.onCrash();
-                }
-                this.setPos(this.stayX, this.stayY, this.stayZ);
-            }
-            case ATTACKER -> {
-                @SuppressWarnings("unused") final SoundManager soundManager = Manager.minecraft.getSoundManager();
-                if (Manager.glitchSound != null && !soundManager.isActive(Manager.glitchSound)) {
-                    Manager.glitchSound = SimpleSoundInstance.forUI(ModSounds.GLITCH422.get(), 100f, 0f);
-                }
-                if (EventHandler.get().ticks >= this.disappearTicks) {
-                    this.disappear();
-                }
-            }
-        }
-        this.setSpeed(0.3f);
-        this.flyingSpeed = 0.15f;
-        Objects.requireNonNull(getAttributes().getInstance(Attributes.ATTACK_DAMAGE), "Attack damage not present").setBaseValue(Double.MAX_VALUE);
-        if (this.getY() < Manager.affectedPlayer.getY() && Manager.attackType != GlitchAttackType.CRASHER) {
-            this.setPos(this.getX(), this.getY() + 2.0, this.getZ());
-        }
-        final int method2311 = Mth.floor(this.getX());
-        final int method2312 = Mth.floor(this.getY());
-        final int method2313 = Mth.floor(this.getZ());
-        if (Manager.world.getBlockState(new BlockPos(method2311, method2312 - 1, method2313)).getBlock() == Blocks.LAVA) {
-            Manager.world.setBlock(new BlockPos(method2311, method2312, method2313), Blocks.WATER.defaultBlockState(), 0x2);
-        }
-        Manager.world.setBlock(new BlockPos(method2311, method2312 + 1, method2313), Blocks.AIR.defaultBlockState(), 0x2);
-        Manager.world.setBlock(new BlockPos(method2311, method2312, method2313), Blocks.AIR.defaultBlockState(), 0x2);
+
+        sided.tick();
     }
 
     @Override
@@ -255,9 +125,9 @@ public class GlitchEntity extends PathfinderMob {
             this.dead = true;
             if (!this.disappeared) {
                 Manager.attackType = null;
-                for (Object e : Manager.validItemsForRandom) {
+                for (Object e : ServerManager.validItemsForRandom) {
                     ItemStack itemStack = e instanceof Block ? new ItemStack((Block) e, 1) : new ItemStack((Item) e, 1);
-                    Manager.world.addFreshEntity(new ItemEntity(Manager.world, this.getX(), this.getY() + 10.0, this.getZ(), itemStack));
+                    ServerManager.level.addFreshEntity(new ItemEntity(ServerManager.level, this.getX(), this.getY() + 10.0, this.getZ(), itemStack));
                 }
             }
         }
@@ -269,7 +139,7 @@ public class GlitchEntity extends PathfinderMob {
         this.setHealth(0);
         discard();
         if (DebugUtils.enabled) {
-            Manager.affectedPlayer.sendSystemMessage(Component.literal("ERR422 is disappeared."));
+            ServerManager.getAffectedPlayer().sendSystemMessage(Component.literal("ERR422 is disappeared."));
         }
     }
 
@@ -283,6 +153,130 @@ public class GlitchEntity extends PathfinderMob {
         Player entityPlayer = this.level.getNearestPlayer(this, 100.0);
         this.setTarget(entityPlayer);
         return entityPlayer;
+    }
+
+    private abstract static class Sided {
+        protected final GlitchEntity entity;
+        protected final Level level;
+
+        public Sided(GlitchEntity entity, Level level) {
+
+            this.entity = entity;
+            this.level = level;
+        }
+
+        public static Sided of(GlitchEntity entity, Level world) {
+            return EnvExecutor.getEnvSpecific(
+                    () -> () -> world.isClientSide() ? new ClientSided(entity, (ClientLevel) world) : new ServerSided(entity, (ServerLevel) world),
+                    () -> () -> new ServerSided(entity, (ServerLevel) world));
+        }
+
+        public void tick() {
+            if (ServerManager.getAffectedPlayer().isDeadOrDying()) this.entity.disappear();
+            else Manager.attackType = this.entity.attackType;
+
+            if (Manager.attackType == null) return;
+
+            if (!this.entity.positionSet) {
+                this.entity.stayX = this.entity.getX();
+                this.entity.stayY = this.entity.getY() + 1.0;
+                this.entity.stayZ = this.entity.getZ();
+                this.entity.positionSet = true;
+            }
+
+            switch (Manager.attackType) {
+                case CRASHER -> {
+                    crash();
+                }
+                case ATTACKER -> {
+                    attack();
+                }
+            }
+
+            this.entity.setSpeed(0.3f);
+            this.entity.flyingSpeed = 0.15f;
+
+            AttributeInstance attackDamage = this.entity.getAttributes().getInstance(Attributes.ATTACK_DAMAGE);
+            if (attackDamage == null) throw new NullPointerException("Attack damage not present");
+
+            attackDamage.setBaseValue(Double.MAX_VALUE);
+
+            if (this.entity.getY() < ServerManager.getAffectedPlayer().getY() && Manager.attackType != GlitchAttackType.CRASHER) {
+                this.entity.setPos(this.entity.getX(), this.entity.getY() + 2.0, this.entity.getZ());
+            }
+
+            final int blockX = Mth.floor(this.entity.getX());
+            final int blockY = Mth.floor(this.entity.getY());
+            final int blockZ = Mth.floor(this.entity.getZ());
+
+            if (ServerManager.level.getBlockState(new BlockPos(blockX, blockY - 1, blockZ)).getBlock() == Blocks.LAVA) {
+                ServerManager.level.setBlock(new BlockPos(blockX, blockY, blockZ), Blocks.WATER.defaultBlockState(), 0x2);
+            }
+
+            ServerManager.level.setBlock(new BlockPos(blockX, blockY + 1, blockZ), Blocks.AIR.defaultBlockState(), 0x2);
+            ServerManager.level.setBlock(new BlockPos(blockX, blockY, blockZ), Blocks.AIR.defaultBlockState(), 0x2);
+        }
+
+        protected void crash() {
+
+        }
+
+        protected abstract void attack();
+    }
+    
+    @Environment(EnvType.CLIENT)
+    private static class ClientSided extends Sided {
+        protected final ClientLevel level;
+        
+        public ClientSided(GlitchEntity entity, ClientLevel level) {
+            super(entity, level);
+            this.level = level;
+        }
+
+        @Override
+        public void tick() {
+            
+        }
+
+        @Override
+        protected void crash() {
+            this.entity.setDeltaMovement(0.0, 0.0, 0.0);
+            if (EventHandler.get().ticks >= this.entity.disappearTicks) {
+                ClientManager.onCrash();
+            }
+            this.entity.setPos(this.entity.stayX, this.entity.stayY, this.entity.stayZ);
+        }
+
+        @Override
+        protected void attack() {
+            ClientManager.minecraft.submit(() -> {
+                final var soundManager = Manager.minecraft.getSoundManager();
+                if (ClientManager.glitchSound != null && !soundManager.isActive(ClientManager.glitchSound)) {
+                    ClientManager.glitchSound = SimpleSoundInstance.forUI(ModSounds.GLITCH422.get(), 100f, 0f);
+                    Manager.minecraft.getSoundManager().play(ClientManager.glitchSound);
+                }
+            });
+            if (EventHandler.get().ticks >= this.entity.disappearTicks) {
+                this.entity.disappear();
+            }
+        }
+    }
+    
+    @Environment(EnvType.CLIENT)
+    private static class ServerSided extends Sided {
+        protected final ServerLevel level;
+        
+        public ServerSided(GlitchEntity entity, ServerLevel level) {
+            super(entity, level);
+            this.level = level;
+        }
+
+        @Override
+        protected void attack() {
+            if (EventHandler.get().ticks >= this.entity.disappearTicks) {
+                this.entity.disappear();
+            }
+        }
     }
 }
 

@@ -1,9 +1,14 @@
 package me.qboi.mods.err422.compat.advdbg;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.ultreon.mods.advanceddebug.api.client.formatter.IFormatterContext;
 import com.ultreon.mods.advanceddebug.api.client.menu.DebugPage;
 import com.ultreon.mods.advanceddebug.api.client.menu.IDebugRenderContext;
-import me.qboi.mods.err422.event.EventHandler;
+import com.ultreon.mods.advanceddebug.api.common.IFormattable;
+
+import java.time.Duration;
+
+import static me.qboi.mods.err422.event.EventHandler.*;
 
 public class Error422DebugPage extends DebugPage {
     public Error422DebugPage(String modId, String name) {
@@ -13,20 +18,45 @@ public class Error422DebugPage extends DebugPage {
     @Override
     public void render(PoseStack poseStack, IDebugRenderContext ctx) {
         ctx.left("Event Timestamps");
-        ctx.left("World", EventHandler.get().worldTimestamp);
-        ctx.left("Glitch", EventHandler.get().glitchTimestamp);
-        ctx.left("Final Attack", EventHandler.get().finalAttackTimestamp);
-        ctx.left("Random Potion", EventHandler.get().randomPotionTimestamp);
-        ctx.left("Error Dump", EventHandler.get().errorDumpTimestamp);
-        ctx.left("Random Knockback", EventHandler.get().randomKnockbackTimestamp);
-        ctx.left("Damage World", EventHandler.get().damageWorldTimestamp);
+        ctx.left("World", WORLD_EVENT.getNextTrigger());
+        ctx.left("Glitch", GLITCH_EVENT.getNextTrigger());
+        ctx.left("Final Attack", FINAL_ATTACK_EVENT.getNextTrigger());
+        ctx.left("Random Potion", RANDOM_POTION_EVENT.getNextTrigger());
+        ctx.left("Error Dump", ERROR_DUMP_EVENT.getNextTrigger());
+        ctx.left("Random Knockback", KNOCKBACK_EVENT.getNextTrigger());
+        ctx.left("Damage World", DAMAGE_WORLD_EVENT.getNextTrigger());
         ctx.right("Event Ticks Remaining");
-        ctx.right("World", (EventHandler.get().worldTimestamp - EventHandler.get().ticks) * 20);
-        ctx.right("Glitch", (EventHandler.get().glitchTimestamp - EventHandler.get().ticks) * 20);
-        ctx.right("Final Attack", (EventHandler.get().finalAttackTimestamp - EventHandler.get().ticks) * 20);
-        ctx.right("Random Potion", (EventHandler.get().randomPotionTimestamp - EventHandler.get().ticks) * 20);
-        ctx.right("Error Dump", (EventHandler.get().errorDumpTimestamp - EventHandler.get().ticks) * 20);
-        ctx.right("Random Knockback", (EventHandler.get().randomKnockbackTimestamp - EventHandler.get().ticks) * 20);
-        ctx.right("Damage World", (EventHandler.get().damageWorldTimestamp - EventHandler.get().ticks) * 20);
+        ctx.right("World", format(WORLD_EVENT.getRemainingTime()));
+        ctx.right("Glitch", format(GLITCH_EVENT.getRemainingTime()));
+        ctx.right("Final Attack", format(FINAL_ATTACK_EVENT.getRemainingTime()));
+        ctx.right("Random Potion", format(RANDOM_POTION_EVENT.getRemainingTime()));
+        ctx.right("Error Dump", format(ERROR_DUMP_EVENT.getRemainingTime()));
+        ctx.right("Random Knockback", format(KNOCKBACK_EVENT.getRemainingTime()));
+        ctx.right("Damage World", format(DAMAGE_WORLD_EVENT.getRemainingTime()));
+    }
+
+    private IFormattable format(Duration time) {
+        return new IFormattable() {
+            @Override
+            public void format(IFormatterContext ctx) {
+                if (time.toDaysPart() == 0) {
+                    if (time.toHoursPart() == 0) {
+                        ctx.number(time.toMinutesPart());
+                    } else {
+                        ctx.number(time.toHoursPart());
+                        ctx.identifier(":");
+                        ctx.number("%02d".formatted(time.toMinutesPart()));
+                    }
+                } else {
+                    ctx.number(time.toDaysPart());
+                    ctx.identifier(":");
+                    ctx.number("%02d".formatted(time.toHoursPart()));
+                    ctx.identifier(":");
+                    ctx.number("%02d".formatted(time.toMinutesPart()));
+                }
+                ctx.identifier(":");
+                ctx.number("%02d".formatted(time.toSecondsPart()));
+            }
+        };
     }
 }

@@ -1,9 +1,8 @@
 package me.qboi.mods.err422.client;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
-import me.qboi.mods.err422.rng.GameRNG;
+import me.qboi.mods.err422.rng.Randomness;
 import me.qboi.mods.err422.utils.Manager;
 import net.minecraft.client.gui.GuiComponent;
 
@@ -45,8 +44,8 @@ public class GlitchRenderer {
         width = Manager.minecraft.screen.width;
         height = Manager.minecraft.screen.height;
         for (int i = 0; i < (width / 6 + 1) * (height / 10); ++i) {
-            chars.add(Character.toString(Manager.validCharacters[GameRNG.nextInt(Manager.validCharacters.length)]));
-            colors.add(GameRNG.nextInt(0xFFFFFF));
+            chars.add(Character.toString(Manager.validCharacters[Randomness.nextInt(Manager.validCharacters.length)]));
+            colors.add(Randomness.nextInt(0xFFFFFF));
         }
     }
 }

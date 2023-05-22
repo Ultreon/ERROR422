@@ -1,12 +1,23 @@
 dependencies {
     // We depend on fabric loader here to use the fabric @Environment annotations and get the mixin dependencies
     // Do NOT use other classes from fabric loader
-    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
+    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
     // Remove the next line if you don't want to depend on the API
-    modApi "dev.architectury:architectury:${rootProject.architectury_version}"
+    modApi "dev.architectury:architectury:${architectury_version}"
 
-    modApi "com.ultreon.mods:ultreon-lib:1.1.0"
-    modApi 'com.github.Ultreon.advanced-debug:advanced-debug:9b626785f7'
+    modApi "com.github.Ultreon.ultreonlib:ultreon-lib:$ultreonlib_version"
+    modApi "com.github.Ultreon.advanced-debug:advanced-debug:$advanced_debug_version"
+
+    implementation "com.github.Ultreon.corelibs:corelibs-collections-v0:$corelibs_version"
+    implementation "com.github.Ultreon.corelibs:corelibs-commons-v0:$corelibs_version"
+    implementation "com.github.Ultreon.corelibs:corelibs-crash-v0:$corelibs_version"
+    implementation "com.github.Ultreon.corelibs:corelibs-datetime-v0:$corelibs_version"
+    implementation "com.github.Ultreon.corelibs:corelibs-events-v1:$corelibs_version"
+    implementation "com.github.Ultreon.corelibs:corelibs-functions-v0:$corelibs_version"
+    implementation "com.github.Ultreon.corelibs:corelibs-registries-v0:$corelibs_version"
+    implementation "com.github.Ultreon.corelibs:corelibs-resources-v0:$corelibs_version"
+    implementation "com.github.Ultreon.corelibs:corelibs-text-v0:$corelibs_version"
+    implementation "com.github.Ultreon.corelibs:corelibs-translations-v0:$corelibs_version"
 }
 
 architectury {

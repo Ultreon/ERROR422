@@ -2,9 +2,9 @@ package me.qboi.mods.err422.mixin.common;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import me.qboi.mods.err422.Error422;
-import me.qboi.mods.err422.rng.GameRNG;
-import me.qboi.mods.err422.utils.Manager;
+import me.qboi.mods.err422.ERROR422;
+import me.qboi.mods.err422.client.ClientManager;
+import me.qboi.mods.err422.rng.Randomness;
 import me.qboi.mods.err422.utils.TimeUtils;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -41,13 +41,13 @@ public abstract class TitleScreenMixin extends Screen {
 
     @Redirect(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShaderTexture(ILnet/minecraft/resources/ResourceLocation;)V", ordinal = 1), method = "render")
     public void err422$injectTitleTexture(int i, ResourceLocation resourceLocation) {
-        RenderSystem.setShaderTexture(i, Error422.res("textures/gui/mclogo.png"));
+        RenderSystem.setShaderTexture(i, ERROR422.res("textures/gui/mclogo.png"));
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/PanoramaRenderer;render(FF)V", ordinal = 0, shift = At.Shift.BEFORE), method = "render")
     public void err422$injectPanoramaRender(PoseStack poseStack, int i, int j, float f, CallbackInfo ci) {
         fill(poseStack, 0, 0, width, height, 0xff000000);
-        Manager.glitchRenderer.render(poseStack);
+        ClientManager.glitchRenderer.render(poseStack);
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/PanoramaRenderer;render(FF)V", ordinal = 0), method = "render")
@@ -57,26 +57,26 @@ public abstract class TitleScreenMixin extends Screen {
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/TitleScreen;blitOutlineBlack(IILjava/util/function/BiConsumer;)V", ordinal = 1, shift = At.Shift.BEFORE), method = "render")
     public void err422$injectRender(PoseStack poseStack, int i, int j, float f, CallbackInfo ci) {
-        Manager.glitchRenderer.reset();
+        ClientManager.glitchRenderer.reset();
         poseStack.pushPose();
         int n4 = this.width / 2 - 137;
         int n5 = 30;
         int n6 = 0;
         int n7 = 0;
         if (this.glitchTick >= 50) {
-            if (GameRNG.nextInt(10) == 0) {
-                n6 = GameRNG.nextInt(10);
-                n7 = GameRNG.nextInt(1);
-                n6 = GameRNG.nextInt(2) == 0 ? -n6 : n6;
-                n7 = GameRNG.nextInt(2) == 0 ? -n7 : n7;
+            if (Randomness.nextInt(10) == 0) {
+                n6 = Randomness.nextInt(10);
+                n7 = Randomness.nextInt(1);
+                n6 = Randomness.nextInt(2) == 0 ? -n6 : n6;
+                n7 = Randomness.nextInt(2) == 0 ? -n7 : n7;
             }
             if (this.glitchTick >= 100) {
                 this.glitchTick = 0;
             }
         }
         if (this.scaleGlitchTick >= 300) {
-            if (GameRNG.nextInt(10) == 0) {
-                poseStack.scale(1.0f, 1.0f + (GameRNG.random.nextFloat() - 0.8f) + 0.8f, 1.0f);
+            if (Randomness.nextInt(10) == 0) {
+                poseStack.scale(1.0f, 1.0f + (Randomness.random.nextFloat() - 0.8f) + 0.8f, 1.0f);
             }
             if (this.scaleGlitchTick >= 330) {
                 this.scaleGlitchTick = 0;
@@ -85,8 +85,8 @@ public abstract class TitleScreenMixin extends Screen {
         if (this.timeoutTicks >= TimeUtils.minutesToTicks(10)) {
             for (GuiEventListener listener : this.children()) {
                 if (listener instanceof Button button) {
-                    button.x = GameRNG.nextInt(width);
-                    button.y = GameRNG.nextInt(height);
+                    button.setX(Randomness.nextInt(width));
+                    button.setY(Randomness.nextInt(height));
                 }
             }
             this.timeoutTicks = 0;

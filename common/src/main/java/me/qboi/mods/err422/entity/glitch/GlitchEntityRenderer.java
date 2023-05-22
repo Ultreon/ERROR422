@@ -1,6 +1,6 @@
 package me.qboi.mods.err422.entity.glitch;
 
-import me.qboi.mods.err422.Error422;
+import me.qboi.mods.err422.ERROR422;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -16,6 +16,6 @@ public class GlitchEntityRenderer extends MobRenderer<GlitchEntity, PlayerModel<
     @NotNull
     @Override
     public ResourceLocation getTextureLocation(@NotNull GlitchEntity entity) {
-        return Error422.res("textures/entity/422.png");
+        return ERROR422.res("textures/entity/422.png");
     }
 }

@@ -1,12 +1,11 @@
 package me.qboi.mods.err422.event;
 
-import me.qboi.mods.err422.rng.GameRNG;
-import me.qboi.mods.err422.utils.Manager;
+import me.qboi.mods.err422.rng.Randomness;
+import me.qboi.mods.err422.server.ServerManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
 class WorldDamageEventThread extends Thread {
@@ -18,43 +17,50 @@ class WorldDamageEventThread extends Thread {
 
     @Override
     public void run() {
-        int x = Mth.floor(Manager.affectedPlayer.getX() + 18.0);
-        int y = Mth.floor(Manager.affectedPlayer.getY() + 10.0);
-        int z = Mth.floor(Manager.affectedPlayer.getZ() + 18.0);
-        //noinspection unused
-        Block fakeLogRef = Blocks.OAK_PLANKS;
-        final int n5 = 36;
-        final int n6 = 20;
-        int eventChoice = -1;
-        if (GameRNG.chance(8)) {
-            eventChoice = 1;
-        } else if (GameRNG.chance(8)) {
-            eventChoice = 2;
+        final int width = 36;
+        final int height = 20;
+        int x = Mth.floor(ServerManager.getAffectedPlayer().getX() + width / 2F);
+        int y = Mth.floor(ServerManager.getAffectedPlayer().getY() + height / 2F);
+        int z = Mth.floor(ServerManager.getAffectedPlayer().getZ() + width / 2F);
+
+        enum Choice {
+            MELT,
+            BURN
         }
-        for (int i = 0; i < n5; ++i) {
-            for (int j = 0; j < n5; ++j) {
-                for (int k = 0; k < n6; ++k) {
-                    if (Manager.world.getBlockState(new BlockPos(x, y - k, z)).getBlock().equals(Blocks.GLASS) && GameRNG.nextInt(3) == 0) {
-                        Manager.world.setBlock(new BlockPos(x, y - k, z), Blocks.AIR.defaultBlockState(), 0b0110010);
-                        Manager.world.playSeededSound(null, x, y, z, SoundEvents.GLASS_BREAK, SoundSource.BLOCKS, 1.0f, 1.0f, System.currentTimeMillis());
+
+        Choice eventChoice = null;
+
+        if (Randomness.chance(8)) eventChoice = Choice.MELT;
+        else if (Randomness.chance(8)) eventChoice = Choice.BURN;
+
+        if (eventChoice == null) return;
+
+        int flags = 0b0110010;
+
+        for (int i = 0; i < width; ++i) {
+            for (int j = 0; j < width; ++j) {
+                for (int k = 0; k < height; ++k) {
+                    if (ServerManager.level.getBlockState(new BlockPos(x, y - k, z)).getBlock().equals(Blocks.GLASS) && Randomness.nextInt(3) == 0) {
+                        ServerManager.level.setBlock(new BlockPos(x, y - k, z), Blocks.AIR.defaultBlockState(), flags);
+                        ServerManager.level.playSeededSound(null, x, y, z, SoundEvents.GLASS_BREAK, SoundSource.BLOCKS, 1.0f, 1.0f, System.currentTimeMillis());
                     }
                     switch (eventChoice) {
-                        case 1 -> {
-                            if (!Manager.world.getBlockState(new BlockPos(x, y - k, z)).getBlock().equals(Blocks.WATER))
+                        case MELT -> {
+                            if (!ServerManager.level.getBlockState(new BlockPos(x, y - k, z)).getBlock().equals(Blocks.WATER))
                                 continue;
-                            Manager.world.setBlock(new BlockPos(x, y - k, z), Blocks.LAVA.defaultBlockState(), 0b0110010);
-                            Manager.world.playSeededSound(null, x, y, z, SoundEvents.STONE_STEP, SoundSource.HOSTILE, 1.0f, 1.0f, System.currentTimeMillis());
+                            ServerManager.level.setBlock(new BlockPos(x, y - k, z), Blocks.LAVA.defaultBlockState(), flags);
+                            ServerManager.level.playSeededSound(null, x, y, z, SoundEvents.STONE_STEP, SoundSource.HOSTILE, 1.0f, 1.0f, System.currentTimeMillis());
                         }
-                        case 2 -> {
-                            if (!Manager.world.getBlockState(new BlockPos(x, y - k + 1, z)).isAir() || Manager.world.getBlockState(new BlockPos(x, y - k, z)).isAir() || GameRNG.nextInt(10) != 0)
+                        case BURN -> {
+                            if (!ServerManager.level.getBlockState(new BlockPos(x, y - k + 1, z)).isAir() || ServerManager.level.getBlockState(new BlockPos(x, y - k, z)).isAir() || Randomness.nextInt(10) != 0)
                                 continue;
-                            Manager.world.setBlock(new BlockPos(x, y - k + 1, z), Blocks.SOUL_FIRE.defaultBlockState(), 0b0110010);
+                            ServerManager.level.setBlock(new BlockPos(x, y - k + 1, z), Blocks.SOUL_FIRE.defaultBlockState(), flags);
                         }
                     }
                 }
                 --x;
             }
-            x += n5;
+            x += width;
             --z;
         }
     }

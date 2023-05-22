@@ -1,0 +1,17 @@
+{
+  "targets": [
+    "swap"
+  ],
+  "passes": [
+    {
+      "name": "e422:g",
+      "intarget": "minecraft:main",
+      "outtarget": "swap"
+    },
+    {
+      "name": "e422:g",
+      "intarget": "swap",
+      "outtarget": "minecraft:main"
+    }
+  ]
+}

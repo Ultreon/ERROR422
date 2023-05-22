@@ -1,7 +1,7 @@
 package me.qboi.mods.err422.mixin.common;
 
-import me.qboi.mods.err422.rng.GameRNG;
-import me.qboi.mods.err422.utils.Manager;
+import me.qboi.mods.err422.rng.Randomness;
+import me.qboi.mods.err422.server.ServerManager;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import org.spongepowered.asm.mixin.Mixin;
@@ -13,8 +13,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class ShapedRecipeMixin {
     @Inject(at = @At("HEAD"), method = "getResultItem", cancellable = true)
     private void err422$injectResult(CallbackInfoReturnable<ItemStack> cir) {
-        if (Manager.recipeReplacement != null || GameRNG.nextInt(200) == 0) {
-            cir.setReturnValue(Manager.randomItem());
+        if (ServerManager.recipeReplacement != null || Randomness.nextInt(200) == 0) {
+            cir.setReturnValue(ServerManager.randomRecipeResult());
         }
     }
 }

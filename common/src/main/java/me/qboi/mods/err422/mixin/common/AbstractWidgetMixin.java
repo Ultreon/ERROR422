@@ -2,12 +2,12 @@ package me.qboi.mods.err422.mixin.common;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import me.qboi.mods.err422.rng.GameRNG;
+import me.qboi.mods.err422.rng.Randomness;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.Widget;
+import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.renderer.GameRenderer;
@@ -23,7 +23,7 @@ import java.awt.*;
 import static net.minecraft.client.gui.components.AbstractWidget.WIDGETS_LOCATION;
 
 @Mixin(AbstractWidget.class)
-public abstract class AbstractWidgetMixin extends GuiComponent implements Widget, GuiEventListener, NarratableEntry {
+public abstract class AbstractWidgetMixin extends GuiComponent implements Renderable, GuiEventListener, NarratableEntry {
     @Shadow protected float alpha;
 
     @Shadow protected abstract int getYImage(boolean bl);
@@ -31,8 +31,10 @@ public abstract class AbstractWidgetMixin extends GuiComponent implements Widget
     @Shadow public abstract boolean isHoveredOrFocused();
 
     @Shadow public boolean active;
-    @Shadow public int x;
-    @Shadow public int y;
+    @Shadow
+    private int x;
+    @Shadow
+    private int y;
     @Shadow protected int width;
     @Shadow protected int height;
 
@@ -40,7 +42,7 @@ public abstract class AbstractWidgetMixin extends GuiComponent implements Widget
 
     @Shadow public abstract Component getMessage();
 
-    private final Color err422$randomColor = new Color(GameRNG.nextInt(140), GameRNG.nextInt(110), GameRNG.nextInt(110));
+    private final Color err422$randomColor = new Color(Randomness.nextInt(140), Randomness.nextInt(110), Randomness.nextInt(110));
 
     /**
      * @author Qboi123
@@ -60,10 +62,10 @@ public abstract class AbstractWidgetMixin extends GuiComponent implements Widget
         int n4 = 0;
         int n3 = 0;
         if (isHoveredOrFocused() && active) {
-            n4 = GameRNG.nextInt(4);
-            n3 = GameRNG.nextInt(3);
-            n4 = GameRNG.nextInt(2) == 0 ? n4 : -n4;
-            n3 = GameRNG.nextInt(2) == 0 ? n3 : -n3;
+            n4 = Randomness.nextInt(4);
+            n3 = Randomness.nextInt(3);
+            n4 = Randomness.nextInt(2) == 0 ? n4 : -n4;
+            n3 = Randomness.nextInt(2) == 0 ? n3 : -n3;
             this.blit(poseStack, this.x + n4, this.y + n3, 0, 46 + k * 20, this.width / 2, this.height);
             this.blit(poseStack, this.x + this.width / 2 + n4, this.y + n3, 200 - this.width / 2, 46 + k * 20, this.width / 2, this.height);
         } else {

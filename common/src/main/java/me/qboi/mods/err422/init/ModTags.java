@@ -1,7 +1,7 @@
 package me.qboi.mods.err422.init;
 
-import me.qboi.mods.err422.Error422;
-import net.minecraft.core.Registry;
+import me.qboi.mods.err422.ERROR422;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
@@ -17,7 +17,7 @@ public class ModTags {
         public static final TagKey<Block> BLOCK_REPLACEMENTS = create("block_replacements");
 
         private static TagKey<Block> create(String name) {
-            return TagKey.create(Registry.BLOCK_REGISTRY, new ResourceLocation(Error422.MOD_ID, name));
+            return TagKey.create(Registries.BLOCK, new ResourceLocation(ERROR422.MOD_ID, name));
         }
 
         private static void register() {
@@ -29,7 +29,7 @@ public class ModTags {
         public static final TagKey<Item> BLOCK_REPLACEMENTS = create("item_random");
 
         private static TagKey<Item> create(String name) {
-            return TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation(Error422.MOD_ID, name));
+            return TagKey.create(Registries.ITEM, new ResourceLocation(ERROR422.MOD_ID, name));
         }
 
         private static void register() {

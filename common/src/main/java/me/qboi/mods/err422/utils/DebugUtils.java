@@ -4,41 +4,43 @@ import com.mojang.blaze3d.platform.InputConstants;
 import me.qboi.mods.err422.anticheat.AntiGamemode;
 import me.qboi.mods.err422.event.EventHandler;
 import me.qboi.mods.err422.mixin.common.KeyMappingAccessor;
+import me.qboi.mods.err422.server.ServerManager;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.world.level.GameType;
 
 public class DebugUtils {
-    public static int events;
+    public static int activeEvents;
     public static boolean enabled;
 
     public static void nopInit() {
     }
 
+    @SuppressWarnings("SpellCheckingInspection")
     public static boolean handleCheatCode(String string) {
-        KeyMapping keyShift = Manager.minecraft.options.keyShift;
-        InputConstants.Key key = ((KeyMappingAccessor) keyShift).getKey();
+        KeyMapping crouchKeyMap = Manager.minecraft.options.keyShift;
+        InputConstants.Key crouchKey = ((KeyMappingAccessor) crouchKeyMap).getKey();
 
-        if (key.getValue() != InputConstants.KEY_4) {
+        if (crouchKey.getValue() != InputConstants.KEY_4) {
             return false;
         }
 
         String[] commandLine = string.split(" ");
         switch (commandLine[0]) {
-            // Stands for Skip
+            // Stands for [S]kip
             case "~s" -> {
                 EventHandler.get().ticks += TimeUtils.minutesToTicks(10);
                 return true;
             }
 
-            // Stands for CReative
+            // Stands for [CR]eative
             case "~cr" -> {
-                Manager.affectedPlayer.setGameMode(GameType.CREATIVE);
+                ServerManager.getAffectedPlayer().setGameMode(GameType.CREATIVE);
                 return true;
             }
 
-            // Stands for AntI GameMode
+            // Stands for [A]nt[I] [G]ame[M]ode
             case "~aigm" -> {
-                AntiGamemode.allowCheats = !AntiGamemode.allowCheats;
+                AntiGamemode.disableCheck = !AntiGamemode.disableCheck;
                 return true;
             }
         }

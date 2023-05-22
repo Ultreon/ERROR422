@@ -2,7 +2,7 @@ package me.qboi.mods.err422.mixin.common;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import me.qboi.mods.err422.rng.GameRNG;
+import me.qboi.mods.err422.rng.Randomness;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.renderer.GameRenderer;
@@ -30,7 +30,7 @@ public abstract class ImageButtonMixin extends AbstractWidget {
     @Shadow @Final private ResourceLocation resourceLocation;
     @Shadow @Final private int textureWidth;
     @Shadow @Final private int textureHeight;
-    private final Color err422$randomColor = new Color(GameRNG.nextInt(140), GameRNG.nextInt(110), GameRNG.nextInt(110));
+    private final Color err422$randomColor = new Color(Randomness.nextInt(140), Randomness.nextInt(110), Randomness.nextInt(110));
 
     public ImageButtonMixin(int i, int j, int k, int l, Component component) {
         super(i, j, k, l, component);
@@ -53,16 +53,13 @@ public abstract class ImageButtonMixin extends AbstractWidget {
         }
         RenderSystem.enableDepthTest();
         if (isHoveredOrFocused() && active) {
-            int n4 = GameRNG.nextInt(4);
-            int n3 = GameRNG.nextInt(3);
-            n4 = GameRNG.nextInt(2) == 0 ? n4 : -n4;
-            n3 = GameRNG.nextInt(2) == 0 ? n3 : -n3;
-            blit(poseStack, this.x + n4, this.y + n3, this.xTexStart, k, this.width, this.height, this.textureWidth, this.textureHeight);
+            int n4 = Randomness.nextInt(4);
+            int n3 = Randomness.nextInt(3);
+            n4 = Randomness.nextInt(2) == 0 ? n4 : -n4;
+            n3 = Randomness.nextInt(2) == 0 ? n3 : -n3;
+            blit(poseStack, this.getX() + n4, this.getY() + n3, this.xTexStart, k, this.width, this.height, this.textureWidth, this.textureHeight);
         } else {
-            blit(poseStack, this.x, this.y, this.xTexStart, k, this.width, this.height, this.textureWidth, this.textureHeight);
-        }
-        if (this.isHovered) {
-            this.renderToolTip(poseStack, i, j);
+            blit(poseStack, this.getX(), this.getY(), this.xTexStart, k, this.width, this.height, this.textureWidth, this.textureHeight);
         }
     }
 }

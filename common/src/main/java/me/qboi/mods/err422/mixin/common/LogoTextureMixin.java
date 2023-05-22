@@ -1,8 +1,7 @@
 package me.qboi.mods.err422.mixin.common;
 
 import com.mojang.blaze3d.platform.NativeImage;
-import me.qboi.mods.err422.Error422;
-import net.minecraft.client.Minecraft;
+import me.qboi.mods.err422.ERROR422;
 import net.minecraft.client.gui.screens.LoadingOverlay;
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.client.resources.metadata.texture.TextureMetadataSection;
@@ -30,7 +29,7 @@ public abstract class LogoTextureMixin extends SimpleTexture {
     public SimpleTexture.TextureImage getTextureImage(@NotNull ResourceManager resourceManager) {
         try {
             SimpleTexture.TextureImage simpletexture$textureimage;
-            try (InputStream inputstream = Error422.class.getResourceAsStream("/assets/error422/textures/gui/mojang.png")) {
+            try (InputStream inputstream = ERROR422.class.getResourceAsStream("/assets/e422/textures/gui/mojang.png")) {
                 simpletexture$textureimage = new SimpleTexture.TextureImage(new TextureMetadataSection(false, false), NativeImage.read(inputstream));
             }
             return simpletexture$textureimage;
