@@ -28,7 +28,7 @@ public class GlitchRenderer {
         int n3 = 0;
         for (int i = 0; i < width / 6 + 1; ++i) {
             for (int j = 0; j < height / 10; ++j) {
-                Manager.minecraft.font.draw(poseStack, chars.get(n3), n, n2, colors.getInt(n3));
+                ClientState.MINECRAFT.font.draw(poseStack, chars.get(n3), n, n2, colors.getInt(n3));
                 n2 += 11;
                 ++n3;
             }
@@ -40,12 +40,12 @@ public class GlitchRenderer {
     public void reset() {
         chars.clear();
         colors.clear();
-        assert Manager.minecraft.screen != null;
-        width = Manager.minecraft.screen.width;
-        height = Manager.minecraft.screen.height;
+        assert ClientState.MINECRAFT.screen != null;
+        width = ClientState.MINECRAFT.screen.width;
+        height = ClientState.MINECRAFT.screen.height;
         for (int i = 0; i < (width / 6 + 1) * (height / 10); ++i) {
-            chars.add(Character.toString(Manager.validCharacters[Randomness.nextInt(Manager.validCharacters.length)]));
-            colors.add(Randomness.nextInt(0xFFFFFF));
+            chars.add(Character.toString(Manager.validCharacters[Randomness.rand(Manager.validCharacters.length)]));
+            colors.add(Randomness.rand(0xFFFFFF));
         }
     }
 }

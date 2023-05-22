@@ -3,30 +3,22 @@ package me.qboi.mods.err422.event;
 import dev.architectury.utils.Env;
 import dev.architectury.utils.EnvExecutor;
 import me.qboi.mods.err422.rng.Randomness;
+import me.qboi.mods.err422.server.ServerPlayerState;
 import me.qboi.mods.err422.utils.DebugUtils;
 import me.qboi.mods.err422.utils.TimeUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
 
 import java.time.Duration;
 
-public abstract class Event {
-    protected Minecraft minecraft = Minecraft.getInstance();
-    int id;
-    protected final EventHandler handler;
+public abstract class AbstractEvent {
     private long nextTrigger;
     private final long minTime;
     private final long maxTime;
 
-    protected Event(long minTime, long maxTime, EventHandler handler) {
+    protected AbstractEvent(long minTime, long maxTime) {
         this.minTime = TimeUtils.minutesToTicks(minTime);
         this.maxTime = TimeUtils.minutesToTicks(maxTime);
-        this.handler = handler;
-    }
-
-    public int id() {
-        return id;
     }
 
     public abstract boolean trigger();
@@ -36,7 +28,7 @@ public abstract class Event {
     }
 
     private long getRemainingTicks() {
-        return this.nextTrigger - this.handler.ticks;
+        return this.nextTrigger - ServerPlayerState.getTicks();
     }
 
     public long getNextTrigger() {
@@ -72,7 +64,7 @@ public abstract class Event {
 
     private void updateIfTimestampIsZero(long time) {
         if (this.nextTrigger == 0L) {
-            this.nextTrigger = this.handler.ticks + time;
+            this.nextTrigger = ServerPlayerState.getTicks() + time;
             preTrigger();
             DebugUtils.activeEvents = 0;
         }
@@ -90,11 +82,11 @@ public abstract class Event {
     }
 
     private boolean shouldTrigger() {
-        return this.handler.ticks >= this.nextTrigger;
+        return ServerPlayerState.getTicks() >= this.nextTrigger;
     }
 
     protected void startTimer(long ticks) {
-        this.nextTrigger = this.handler.ticks + ticks;
+        this.nextTrigger = ServerPlayerState.getTicks() + ticks;
         ++DebugUtils.activeEvents;
     }
 }

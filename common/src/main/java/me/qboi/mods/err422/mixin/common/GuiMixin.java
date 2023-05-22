@@ -20,7 +20,7 @@ public abstract class GuiMixin extends GuiComponent {
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;blit(Lcom/mojang/blaze3d/vertex/PoseStack;IIIIII)V"), method = "renderHeart")
     private void err422$corruptHealthBar(Gui instance, PoseStack poseStack, int x, int y, int u, int v, int width, int height) {
-        int texOff = Randomness.nextInt(0xFFFFFFF);
+        int texOff = Randomness.rand(0xFFFFFFF);
 
         if (Objects.requireNonNull(this.minecraft.player).hasEffect(MobEffects.POISON)) {
             texOff += 36;
@@ -28,13 +28,13 @@ public abstract class GuiMixin extends GuiComponent {
             texOff += 72;
         }
 
-        int offset = Randomness.nextInt(2) == 0 ? Randomness.nextInt(20) : -Randomness.nextInt(20);
+        int offset = Randomness.rand(2) == 0 ? Randomness.rand(20) : -Randomness.rand(20);
         this.blit(poseStack, x + offset, y, texOff + u, v, width, height);
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;blit(Lcom/mojang/blaze3d/vertex/PoseStack;IIIIII)V"), method = "renderPlayerHealth")
     private void err422$corruptHungerBar(Gui instance, PoseStack poseStack, int x, int y, int u, int v, int width, int height) {
-        int texOff = Randomness.nextInt(0xFFFFFFF);
+        int texOff = Randomness.rand(0xFFFFFFF);
 
         if (Objects.requireNonNull(this.minecraft.player).hasEffect(MobEffects.POISON)) {
             texOff += 36;
@@ -42,7 +42,7 @@ public abstract class GuiMixin extends GuiComponent {
             texOff += 72;
         }
 
-        int offset = Randomness.nextInt(2) == 0 ? Randomness.nextInt(20) : -Randomness.nextInt(20);
+        int offset = Randomness.rand(2) == 0 ? Randomness.rand(20) : -Randomness.rand(20);
         this.blit(poseStack, x + offset, y, texOff + u, v, width, height);
     }
 }

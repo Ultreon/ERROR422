@@ -1,7 +1,7 @@
 package me.qboi.mods.err422.mixin.common;
 
 import com.mojang.blaze3d.platform.NativeImage;
-import me.qboi.mods.err422.ERROR422;
+import me.qboi.mods.err422.Main;
 import net.minecraft.client.gui.screens.LoadingOverlay;
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.client.resources.metadata.texture.TextureMetadataSection;
@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -27,12 +28,14 @@ public abstract class LogoTextureMixin extends SimpleTexture {
     @NotNull
     @Overwrite
     public SimpleTexture.TextureImage getTextureImage(@NotNull ResourceManager resourceManager) {
+        String path = "/assets/e422/textures/gui/mojang.png";
         try {
-            SimpleTexture.TextureImage simpletexture$textureimage;
-            try (InputStream inputstream = ERROR422.class.getResourceAsStream("/assets/e422/textures/gui/mojang.png")) {
-                simpletexture$textureimage = new SimpleTexture.TextureImage(new TextureMetadataSection(false, false), NativeImage.read(inputstream));
+            SimpleTexture.TextureImage image;
+            try (InputStream stream = Main.class.getResourceAsStream(path)) {
+                if (stream == null) throw new FileNotFoundException(path);
+                image = new SimpleTexture.TextureImage(new TextureMetadataSection(false, false), NativeImage.read(stream));
             }
-            return simpletexture$textureimage;
+            return image;
         } catch (IOException ioexception) {
             return new SimpleTexture.TextureImage(ioexception);
         }

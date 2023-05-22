@@ -1,5 +1,4 @@
 package me.qboi.mods.err422.rng;
-import net.minecraft.server.level.ServerPlayer;
 
 import java.util.List;
 import java.util.Random;
@@ -7,12 +6,36 @@ import java.util.Random;
 public class Randomness {
     public static Random random = new Random();
 
-    public static int nextIntBetween(int min, int max) {
+    public static int rand(int min, int max) {
         return random.nextInt(min, max);
     }
 
-    public static int nextInt(int max) {
+    public static int rand(int max) {
         return random.nextInt(max);
+    }
+
+    public static long rand(long min, long max) {
+        return random.nextLong(min, max);
+    }
+
+    public static long rand(long max) {
+        return random.nextLong(max);
+    }
+
+    public static float rand(float min, float max) {
+        return random.nextFloat(min, max);
+    }
+
+    public static float rand(float max) {
+        return random.nextFloat(max);
+    }
+
+    public static double rand(double min, double max) {
+        return random.nextDouble(min, max);
+    }
+
+    public static double rand(double max) {
+        return random.nextDouble(max);
     }
 
     public static boolean chance(int chance) {
@@ -28,7 +51,7 @@ public class Randomness {
     }
 
     public static <T> T choose(List<? extends T> players) {
-        return players.get(nextInt(players.size() - 1));
+        return players.get(rand(players.size() - 1));
     }
 }
 

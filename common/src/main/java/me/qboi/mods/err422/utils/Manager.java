@@ -1,17 +1,14 @@
 package me.qboi.mods.err422.utils;
 
-import me.qboi.mods.err422.entity.glitch.GlitchAttackType;
-import me.qboi.mods.err422.rng.Randomness;
-import me.qboi.mods.err422.server.ServerManager;
-import net.minecraft.client.Minecraft;
+import me.qboi.mods.err422.server.ServerPlayerState;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffect;
 
 import java.util.ArrayList;
 
 public class Manager {
-    public static Minecraft minecraft = Minecraft.getInstance();
     public static ArrayList<MobEffect> effectiveEffects = new ArrayList<>();
 
     @SuppressWarnings("SpellCheckingInspection")
@@ -21,10 +18,6 @@ public class Manager {
     public static float glitchXRot;
     public static float glitchYRot;
 
-    public static String randomizedMcVersion = String.format("1.%s.%s", numbers[Randomness.nextInt(numbers.length)], numbers[Randomness.nextInt(numbers.length)]);
-    public static GlitchAttackType attackType;
-    public static boolean glitching;
-
     static {
         for (final MobEffect object : BuiltInRegistries.MOB_EFFECT.stream().toList()) {
             if (null == object) continue;
@@ -32,8 +25,11 @@ public class Manager {
         }
     }
 
-    public static void logAffected(String message) {
-        ServerManager.getAffectedPlayer().sendSystemMessage(Component.literal(message));
+    public static void logAffected(ServerPlayerState state, String message) {
+        ServerPlayer player = state.getPlayer();
+        if (player == null) return;
+
+        player.sendSystemMessage(Component.literal(message));
     }
 }
 

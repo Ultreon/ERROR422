@@ -18,10 +18,10 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "me.qboi.mods.err422.fabric.Error422PortedFabric"
+      "me.qboi.mods.err422.fabric.ERROR422"
     ],
     "client": [
-      "me.qboi.mods.err422.fabric.Error422PortedFabricClient"
+      "me.qboi.mods.err422.fabric.ERROR422Client"
     ]
   },
   "mixins": [

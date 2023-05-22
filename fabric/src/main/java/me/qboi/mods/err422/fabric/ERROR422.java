@@ -1,11 +1,11 @@
 package me.qboi.mods.err422.fabric;
 
-import me.qboi.mods.err422.ERROR422;
+import me.qboi.mods.err422.Main;
 import net.fabricmc.api.ModInitializer;
 
-public class Error422PortedFabric implements ModInitializer {
+public class ERROR422 implements ModInitializer {
     @Override
     public void onInitialize() {
-        ERROR422.init();
+        Main.init();
     }
 }

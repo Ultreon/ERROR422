@@ -42,7 +42,7 @@ public abstract class AbstractWidgetMixin extends GuiComponent implements Render
 
     @Shadow public abstract Component getMessage();
 
-    private final Color err422$randomColor = new Color(Randomness.nextInt(140), Randomness.nextInt(110), Randomness.nextInt(110));
+    private final Color err422$randomColor = new Color(Randomness.rand(140), Randomness.rand(110), Randomness.rand(110));
 
     /**
      * @author Qboi123
@@ -62,10 +62,10 @@ public abstract class AbstractWidgetMixin extends GuiComponent implements Render
         int n4 = 0;
         int n3 = 0;
         if (isHoveredOrFocused() && active) {
-            n4 = Randomness.nextInt(4);
-            n3 = Randomness.nextInt(3);
-            n4 = Randomness.nextInt(2) == 0 ? n4 : -n4;
-            n3 = Randomness.nextInt(2) == 0 ? n3 : -n3;
+            n4 = Randomness.rand(4);
+            n3 = Randomness.rand(3);
+            n4 = Randomness.rand(2) == 0 ? n4 : -n4;
+            n3 = Randomness.rand(2) == 0 ? n3 : -n3;
             this.blit(poseStack, this.x + n4, this.y + n3, 0, 46 + k * 20, this.width / 2, this.height);
             this.blit(poseStack, this.x + this.width / 2 + n4, this.y + n3, 200 - this.width / 2, 46 + k * 20, this.width / 2, this.height);
         } else {

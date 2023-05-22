@@ -1,21 +1,14 @@
 package me.qboi.mods.err422.entity.glitch;
 
-import dev.architectury.utils.EnvExecutor;
-import me.qboi.mods.err422.client.ClientManager;
-import me.qboi.mods.err422.event.EventHandler;
-import me.qboi.mods.err422.init.ModSounds;
-import me.qboi.mods.err422.server.ServerManager;
+import me.qboi.mods.err422.Main;
+import me.qboi.mods.err422.network.packets.CrashPacket;
+import me.qboi.mods.err422.server.ServerPlayerState;
+import me.qboi.mods.err422.server.ServerState;
 import me.qboi.mods.err422.utils.DebugUtils;
-import me.qboi.mods.err422.utils.Manager;
 import me.qboi.mods.err422.utils.TimeUtils;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
@@ -38,32 +31,38 @@ import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.NotNull;
 
 public class GlitchEntity extends PathfinderMob {
-    private final GlitchAttackType attackType;
-    private final Sided sided;
+    private AttackType attackType;
     private long disappearTicks;
     private double stayX;
     private double stayY;
     private double stayZ;
     private boolean positionSet;
     private boolean disappeared;
+    private ServerPlayerState state;
 
-    public GlitchEntity(EntityType<? extends GlitchEntity> type, Level world) {
-        super(type, world);
+    public GlitchEntity(EntityType<? extends GlitchEntity> type, Level level) {
+        super(type, level);
+    }
 
-        this.sided = Sided.of(this, world);
+    public void setState(ServerPlayerState state) {
+        if (state == null) throw new IllegalArgumentException("State shouldn't be null");
 
-        this.attackType = Manager.attackType;
-        this.setLastHurtMob(ServerManager.getAffectedPlayer());
+        ServerPlayerState old = this.state;
+        this.state = state;
+        if (old != state) {
+            if (old != null) {
+                old.setGlitching(false);
+            }
+            state.setGlitching(true);
+        }
 
-        Manager.glitchXRot = ServerManager.getAffectedPlayer().getXRot();
-        Manager.glitchYRot = ServerManager.getAffectedPlayer().getYRot();
-        Manager.glitching = true;
+        this.attackType = this.state.attackType;
+        this.setLastHurtMob(this.state.getPlayer());
 
-        if (Manager.attackType == GlitchAttackType.ATTACKER) {
-            this.disappearTicks = EventHandler.get().ticks + TimeUtils.minutesToTicks(1);
-        } else if (Manager.attackType == GlitchAttackType.CRASHER) {
-            Manager.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(ModSounds.GLITCH422.get(), 100, 0.0f));
-            this.disappearTicks = EventHandler.get().ticks + 80L;
+        if (this.state.attackType == AttackType.ATTACKER) {
+            this.disappearTicks = ServerPlayerState.getTicks() + TimeUtils.minutesToTicks(1);
+        } else if (this.state.attackType == AttackType.CRASHER) {
+            this.disappearTicks = ServerPlayerState.getTicks() + 80L;
         }
     }
 
@@ -75,7 +74,15 @@ public class GlitchEntity extends PathfinderMob {
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH, 50.0).add(Attributes.MOVEMENT_SPEED, 0.30000001192092896).add(Attributes.ATTACK_DAMAGE, 100);
+        return Monster.createMonsterAttributes()
+                .add(Attributes.MAX_HEALTH, 50.0)
+                .add(Attributes.MOVEMENT_SPEED, 0.30000001192092896)
+                .add(Attributes.ATTACK_DAMAGE, 100);
+    }
+
+    @Override
+    public boolean shouldBeSaved() {
+        return false;
     }
 
     @NotNull
@@ -96,7 +103,7 @@ public class GlitchEntity extends PathfinderMob {
 
     @Override
     public boolean canAttack(@NotNull LivingEntity livingEntity) {
-        if (Manager.attackType == GlitchAttackType.CRASHER) {
+        if (this.state.attackType == AttackType.CRASHER) {
             return false;
         }
 
@@ -116,30 +123,99 @@ public class GlitchEntity extends PathfinderMob {
     public void tick() {
         super.tick();
 
-        sided.tick();
+        if (this.level.isClientSide()) return;
+
+        ServerPlayerState state = this.state;
+        Player player = state.getPlayer();
+        if (player == null || player.isDeadOrDying()) {
+            this.disappear();
+            return;
+        } else {
+            state.attackType = this.attackType;
+        }
+
+        if (state.attackType == null) return;
+
+        if (!this.positionSet) {
+            this.stayX = this.getX();
+            this.stayY = this.getY() + 1.0;
+            this.stayZ = this.getZ();
+            this.positionSet = true;
+        }
+
+        switch (state.attackType) {
+            case CRASHER -> crash();
+            case ATTACKER -> attack();
+        }
+
+        this.setSpeed(0.3f);
+        this.flyingSpeed = 0.15f;
+
+        AttributeInstance attackDamage = this.getAttributes().getInstance(Attributes.ATTACK_DAMAGE);
+        if (attackDamage == null) throw new NullPointerException("Attack damage not present");
+
+        attackDamage.setBaseValue(Double.MAX_VALUE);
+
+        if (this.getY() < player.getY() && state.attackType != AttackType.CRASHER) {
+            this.setPos(this.getX(), this.getY() + 2.0, this.getZ());
+        }
+
+        final int blockX = Mth.floor(this.getX());
+        final int blockY = Mth.floor(this.getY());
+        final int blockZ = Mth.floor(this.getZ());
+
+        if (this.level.getBlockState(new BlockPos(blockX, blockY - 1, blockZ)).getBlock() == Blocks.LAVA) {
+            this.level.setBlock(new BlockPos(blockX, blockY, blockZ), Blocks.WATER.defaultBlockState(), 0x2);
+        }
+
+        this.level.setBlock(new BlockPos(blockX, blockY + 1, blockZ), Blocks.AIR.defaultBlockState(), 0x2);
+        this.level.setBlock(new BlockPos(blockX, blockY, blockZ), Blocks.AIR.defaultBlockState(), 0x2);
+    }
+
+    private void crash() {
+        this.setDeltaMovement(0.0, 0.0, 0.0);
+        this.setPos(this.stayX, this.stayY, this.stayZ);
+        if (ServerPlayerState.getTicks() >= this.disappearTicks) {
+            Main.getNetwork().sendToClient(new CrashPacket(), this.state.getPlayer());
+        }
+    }
+
+    private void attack() {
+        if (ServerPlayerState.getTicks() >= this.disappearTicks) {
+            this.disappear();
+        }
     }
 
     @Override
     public void die(@NotNull DamageSource source) {
         if (this.getHealth() <= 0) {
-            this.dead = true;
-            if (!this.disappeared) {
-                Manager.attackType = null;
-                for (Object e : ServerManager.validItemsForRandom) {
-                    ItemStack itemStack = e instanceof Block ? new ItemStack((Block) e, 1) : new ItemStack((Item) e, 1);
-                    ServerManager.level.addFreshEntity(new ItemEntity(ServerManager.level, this.getX(), this.getY() + 10.0, this.getZ(), itemStack));
-                }
-            }
+            super.die(source);
+        }
+    }
+
+    @Override
+    protected void dropAllDeathLoot(@NotNull DamageSource damageSource) {
+        if (!this.disappeared) {
+            this.state.attackType = null;
+        }
+
+        for (Object e : ServerState.validItemsForRandom) {
+            ItemStack itemStack = e instanceof Block ? new ItemStack((Block) e, 1) : new ItemStack((Item) e, 1);
+            this.level.addFreshEntity(new ItemEntity(this.level, this.getX(), this.getY() + 10.0, this.getZ(), itemStack));
         }
     }
 
     public void disappear() {
-        Manager.attackType = null;
+        this.state.attackType = null;
         this.disappeared = true;
         this.setHealth(0);
+        this.state.setGlitching(false);
         discard();
         if (DebugUtils.enabled) {
-            ServerManager.getAffectedPlayer().sendSystemMessage(Component.literal("ERR422 is disappeared."));
+            Player player = this.state.getPlayer();
+            if (player != null) {
+                player.sendSystemMessage(Component.literal("ERR422 is disappeared."));
+            }
         }
     }
 
@@ -155,128 +231,13 @@ public class GlitchEntity extends PathfinderMob {
         return entityPlayer;
     }
 
-    private abstract static class Sided {
-        protected final GlitchEntity entity;
-        protected final Level level;
-
-        public Sided(GlitchEntity entity, Level level) {
-
-            this.entity = entity;
-            this.level = level;
-        }
-
-        public static Sided of(GlitchEntity entity, Level world) {
-            return EnvExecutor.getEnvSpecific(
-                    () -> () -> world.isClientSide() ? new ClientSided(entity, (ClientLevel) world) : new ServerSided(entity, (ServerLevel) world),
-                    () -> () -> new ServerSided(entity, (ServerLevel) world));
-        }
-
-        public void tick() {
-            if (ServerManager.getAffectedPlayer().isDeadOrDying()) this.entity.disappear();
-            else Manager.attackType = this.entity.attackType;
-
-            if (Manager.attackType == null) return;
-
-            if (!this.entity.positionSet) {
-                this.entity.stayX = this.entity.getX();
-                this.entity.stayY = this.entity.getY() + 1.0;
-                this.entity.stayZ = this.entity.getZ();
-                this.entity.positionSet = true;
-            }
-
-            switch (Manager.attackType) {
-                case CRASHER -> {
-                    crash();
-                }
-                case ATTACKER -> {
-                    attack();
-                }
-            }
-
-            this.entity.setSpeed(0.3f);
-            this.entity.flyingSpeed = 0.15f;
-
-            AttributeInstance attackDamage = this.entity.getAttributes().getInstance(Attributes.ATTACK_DAMAGE);
-            if (attackDamage == null) throw new NullPointerException("Attack damage not present");
-
-            attackDamage.setBaseValue(Double.MAX_VALUE);
-
-            if (this.entity.getY() < ServerManager.getAffectedPlayer().getY() && Manager.attackType != GlitchAttackType.CRASHER) {
-                this.entity.setPos(this.entity.getX(), this.entity.getY() + 2.0, this.entity.getZ());
-            }
-
-            final int blockX = Mth.floor(this.entity.getX());
-            final int blockY = Mth.floor(this.entity.getY());
-            final int blockZ = Mth.floor(this.entity.getZ());
-
-            if (ServerManager.level.getBlockState(new BlockPos(blockX, blockY - 1, blockZ)).getBlock() == Blocks.LAVA) {
-                ServerManager.level.setBlock(new BlockPos(blockX, blockY, blockZ), Blocks.WATER.defaultBlockState(), 0x2);
-            }
-
-            ServerManager.level.setBlock(new BlockPos(blockX, blockY + 1, blockZ), Blocks.AIR.defaultBlockState(), 0x2);
-            ServerManager.level.setBlock(new BlockPos(blockX, blockY, blockZ), Blocks.AIR.defaultBlockState(), 0x2);
-        }
-
-        protected void crash() {
-
-        }
-
-        protected abstract void attack();
+    public ServerPlayerState getState() {
+        return this.state;
     }
-    
-    @Environment(EnvType.CLIENT)
-    private static class ClientSided extends Sided {
-        protected final ClientLevel level;
-        
-        public ClientSided(GlitchEntity entity, ClientLevel level) {
-            super(entity, level);
-            this.level = level;
-        }
 
-        @Override
-        public void tick() {
-            
-        }
-
-        @Override
-        protected void crash() {
-            this.entity.setDeltaMovement(0.0, 0.0, 0.0);
-            if (EventHandler.get().ticks >= this.entity.disappearTicks) {
-                ClientManager.onCrash();
-            }
-            this.entity.setPos(this.entity.stayX, this.entity.stayY, this.entity.stayZ);
-        }
-
-        @Override
-        protected void attack() {
-            ClientManager.minecraft.submit(() -> {
-                final var soundManager = Manager.minecraft.getSoundManager();
-                if (ClientManager.glitchSound != null && !soundManager.isActive(ClientManager.glitchSound)) {
-                    ClientManager.glitchSound = SimpleSoundInstance.forUI(ModSounds.GLITCH422.get(), 100f, 0f);
-                    Manager.minecraft.getSoundManager().play(ClientManager.glitchSound);
-                }
-            });
-            if (EventHandler.get().ticks >= this.entity.disappearTicks) {
-                this.entity.disappear();
-            }
-        }
-    }
-    
-    @Environment(EnvType.CLIENT)
-    private static class ServerSided extends Sided {
-        protected final ServerLevel level;
-        
-        public ServerSided(GlitchEntity entity, ServerLevel level) {
-            super(entity, level);
-            this.level = level;
-        }
-
-        @Override
-        protected void attack() {
-            if (EventHandler.get().ticks >= this.entity.disappearTicks) {
-                this.entity.disappear();
-            }
-        }
+    public enum AttackType {
+        CRASHER,
+        ATTACKER
     }
 }
 

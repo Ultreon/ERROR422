@@ -1,11 +1,12 @@
-package me.qboi.mods.err422.event;
+package me.qboi.mods.err422.event.local;
 
 import me.qboi.mods.err422.rng.Randomness;
-import me.qboi.mods.err422.utils.Manager;
+import me.qboi.mods.err422.server.ServerPlayerState;
+import net.minecraft.world.entity.player.Player;
 
-public class KnockbackEvent extends Event {
-    public KnockbackEvent(EventHandler handler) {
-        super(15, 15, handler);
+public class KnockbackEvent extends LocalEvent {
+    public KnockbackEvent(ServerPlayerState state) {
+        super(15, 15, state);
     }
 
     @Override
@@ -21,7 +22,8 @@ public class KnockbackEvent extends Event {
                 x = 0;
             }
 
-            if (Manager.minecraft.player != null) Manager.minecraft.player.knockback(1, x, z);
+            Player player = this.state.getPlayer();
+            if (player != null) player.knockback(1, x, z);
         }
         return true;
     }
