@@ -1,7 +1,6 @@
-package me.qboi.mods.err422.event.local;
+package me.qboi.mods.err422.event.util;
 
 import me.qboi.mods.err422.rng.Randomness;
-import me.qboi.mods.err422.server.ServerPlayerState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -10,13 +9,11 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Blocks;
 
-class RoastPlayerEvent extends Thread {
-    final ServerPlayerState state;
+public class RoastPlayerThread extends Thread {
     private final ServerPlayer player;
     private final ServerLevel level;
 
-    RoastPlayerEvent(ServerPlayerState state, ServerPlayer player, ServerLevel level) {
-        this.state = state;
+    public RoastPlayerThread(ServerPlayer player, ServerLevel level) {
         this.player = player;
         this.level = level;
     }

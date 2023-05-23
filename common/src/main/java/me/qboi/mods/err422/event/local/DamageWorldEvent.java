@@ -1,5 +1,6 @@
 package me.qboi.mods.err422.event.local;
 
+import me.qboi.mods.err422.event.util.RoastPlayerThread;
 import me.qboi.mods.err422.server.ServerPlayerState;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -16,7 +17,7 @@ public class DamageWorldEvent extends LocalEvent {
         if (player == null) return false;
         if (!(player.level instanceof ServerLevel level)) return true;
 
-        final RoastPlayerEvent thread = new RoastPlayerEvent(this.state, player, level);
+        final RoastPlayerThread thread = new RoastPlayerThread(player, level);
         thread.run();  // Dumb developer forgot to call Thread.start() instead of Thread.run()
         return true;
     }
