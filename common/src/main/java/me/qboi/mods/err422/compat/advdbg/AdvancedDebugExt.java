@@ -11,6 +11,7 @@ import me.qboi.mods.err422.Main;
 public class AdvancedDebugExt implements Extension {
     @Override
     public void initPages(IInitPagesEvent initEvent) {
+        System.out.println("TEST");
         if (Platform.isDevelopmentEnvironment()) initEvent.register(new Error422DebugPage(Main.MOD_ID, "main"));
     }
 

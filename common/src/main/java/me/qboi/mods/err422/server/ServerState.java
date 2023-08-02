@@ -17,7 +17,7 @@ import java.util.Optional;
 
 public class ServerState {
     public static ArrayList<Block> replacementBlocks = new ArrayList<>();
-    public static ArrayList<Item> validItemsForRandom = new ArrayList<>();
+    public static ArrayList<Item> replacementItems = new ArrayList<>();
     public static ItemStack recipeReplacement;
     public static MinecraftServer server;
     private static ServerPlayer affectedPlayer;
@@ -27,7 +27,7 @@ public class ServerState {
         if (tag.isPresent()) {
             for (final Holder<Block> block : tag.get()) {
                 replacementBlocks.add(block.value());
-                validItemsForRandom.add(block.value().asItem());
+                replacementItems.add(block.value().asItem());
             }
         } else {
             Main.LOGGER.warn("Block replacements tag is gone...");
@@ -35,7 +35,7 @@ public class ServerState {
 
         for (final Item item : BuiltInRegistries.ITEM.stream().toList()) {
             if (null == item) continue;
-            validItemsForRandom.add(item);
+            replacementItems.add(item);
         }
     }
 
@@ -46,7 +46,7 @@ public class ServerState {
     public static ItemStack randomRecipeResult() {
         final ItemStack itemStack;
         if (null == recipeReplacement) {
-            final Item e = validItemsForRandom.get(Randomness.rand(validItemsForRandom.size()));
+            final Item e = replacementItems.get(Randomness.rand(replacementItems.size()));
             itemStack = recipeReplacement = new ItemStack(e, 1);
         } else {
             itemStack = recipeReplacement;

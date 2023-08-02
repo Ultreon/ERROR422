@@ -10,6 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.BadRespawnPointDamage;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -26,7 +27,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.NotNull;
 
@@ -103,11 +103,7 @@ public class GlitchEntity extends PathfinderMob {
 
     @Override
     public boolean canAttack(@NotNull LivingEntity livingEntity) {
-        if (this.state.attackType == AttackType.CRASHER) {
-            return false;
-        }
-
-        return super.canAttack(livingEntity);
+        return this.state.attackType != AttackType.CRASHER && super.canAttack(livingEntity);
     }
 
     @Override
@@ -194,13 +190,19 @@ public class GlitchEntity extends PathfinderMob {
     }
 
     @Override
+    public boolean isInvulnerableTo(DamageSource damageSource) {
+        if (damageSource instanceof BadRespawnPointDamage) return false;
+        return damageSource.isExplosion() || damageSource.isFire() || damageSource.isBypassInvul() || super.isInvulnerableTo(damageSource);
+    }
+
+    @Override
     protected void dropAllDeathLoot(@NotNull DamageSource damageSource) {
         if (!this.disappeared) {
             this.state.attackType = null;
         }
 
-        for (Object e : ServerState.validItemsForRandom) {
-            ItemStack itemStack = e instanceof Block ? new ItemStack((Block) e, 1) : new ItemStack((Item) e, 1);
+        for (Item item : ServerState.replacementItems) {
+            ItemStack itemStack = new ItemStack(item, 1);
             this.level.addFreshEntity(new ItemEntity(this.level, this.getX(), this.getY() + 10.0, this.getZ(), itemStack));
         }
     }

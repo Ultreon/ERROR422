@@ -11,10 +11,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -55,6 +52,10 @@ public class ServerPlayerState {
 
     public static void skip(int ticks) {
         ServerPlayerState.ticks += ticks;
+    }
+
+    public static Collection<? extends GlobalEvent> getGlobalEvents() {
+        return Collections.unmodifiableCollection(GLOBAL_EVENTS);
     }
 
     private void init() {
@@ -160,6 +161,10 @@ public class ServerPlayerState {
 
     public ServerPlayer getPlayer() {
         return this.player;
+    }
+
+    public Collection<? extends LocalEvent> getEvents() {
+        return Collections.unmodifiableCollection(this.localEvents);
     }
 }
 
