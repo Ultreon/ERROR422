@@ -64,19 +64,16 @@ public class FinalAttackEvent extends LocalEvent {
             // Glitch entity
             final GlitchEntity theGlitch;
 
+            // Create entity
+            theGlitch = new GlitchEntity(ModEntityTypes.ERR422.get(), level);
+            theGlitch.setState(this.state);
+
             switch (this.state.attackType) {
-                case ATTACKER -> {
+                case ATTACKER ->
                     // Move to affected player.
-                    theGlitch = new GlitchEntity(ModEntityTypes.ERR422.get(), level);
-                    theGlitch.setState(this.state);
                     theGlitch.moveTo(player.getX(), player.getY(), player.getZ(), 0.0f, 0.0f);
-                }
                 case CRASHER -> {
                     HitResult hitResult = this.crosshair.traceHit(10, false);
-
-                    // Create entity
-                    theGlitch = new GlitchEntity(ModEntityTypes.ERR422.get(), level);
-                    theGlitch.setState(this.state);
 
                     // Mark return player position
                     this.lastPlayerPosX = player.getX();

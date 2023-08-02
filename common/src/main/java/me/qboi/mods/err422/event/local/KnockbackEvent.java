@@ -23,7 +23,7 @@ public class KnockbackEvent extends LocalEvent {
             }
 
             Player player = this.state.getPlayer();
-            if (player != null) player.knockback(1, x, z);
+            if (player != null) player.knockback(0.5F, x, z);
         }
         return true;
     }

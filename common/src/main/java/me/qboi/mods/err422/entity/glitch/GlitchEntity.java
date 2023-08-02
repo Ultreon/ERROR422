@@ -121,6 +121,8 @@ public class GlitchEntity extends PathfinderMob {
 
         if (this.level.isClientSide()) return;
 
+        System.out.println("[GLITCH_ENTITY -> TICK] do the ticking pls");
+
         ServerPlayerState state = this.state;
         Player player = state.getPlayer();
         if (player == null || player.isDeadOrDying()) {
@@ -129,6 +131,8 @@ public class GlitchEntity extends PathfinderMob {
         } else {
             state.attackType = this.attackType;
         }
+
+        System.out.println("[GLITCH_ENTITY -> TICK] attackType = " + this.attackType);
 
         if (state.attackType == null) return;
 
@@ -140,8 +144,8 @@ public class GlitchEntity extends PathfinderMob {
         }
 
         switch (state.attackType) {
-            case CRASHER -> crash();
-            case ATTACKER -> attack();
+            case CRASHER -> crashGoal();
+            case ATTACKER -> attackGoal();
         }
 
         this.setSpeed(0.3f);
@@ -168,18 +172,25 @@ public class GlitchEntity extends PathfinderMob {
         this.level.setBlock(new BlockPos(blockX, blockY, blockZ), Blocks.AIR.defaultBlockState(), 0x2);
     }
 
-    private void crash() {
+    private void crashGoal() {
+        System.out.println("[DUMP] GlitchEntity.crashGoal");
         this.setDeltaMovement(0.0, 0.0, 0.0);
         this.setPos(this.stayX, this.stayY, this.stayZ);
-        if (ServerPlayerState.getTicks() >= this.disappearTicks) {
+        if (this.shouldDisappear()) {
+            System.out.println("[DUMP] GlitchEntity.crashGoal -> shouldDisappear");
             Main.getNetwork().sendToClient(new CrashPacket(), this.state.getPlayer());
         }
     }
 
-    private void attack() {
-        if (ServerPlayerState.getTicks() >= this.disappearTicks) {
+    private void attackGoal() {
+        System.out.println("[DUMP] GlitchEntity.attackGoal");
+        if (this.shouldDisappear()) {
+            System.out.println("[DUMP] GlitchEntity.attackGoal -> shouldDisappear");
             this.disappear();
         }
+    }
+    private boolean shouldDisappear() {
+        return ServerPlayerState.getTicks() >= this.disappearTicks;
     }
 
     @Override

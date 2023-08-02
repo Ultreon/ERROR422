@@ -11,6 +11,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameType;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
 
@@ -23,7 +24,7 @@ public class DebugUtils {
     }
 
     @SuppressWarnings("SpellCheckingInspection")
-    public static boolean handleCheatCode(ServerPlayer player, String string) {
+    public static boolean handleCheatCode(@NotNull ServerPlayer player, String string) {
         if (Platform.isDevelopmentEnvironment() && string.equals("{} DEBUG")) {
             ServerPlayerState playerState = ServerPlayerState.get(player);
             for (LocalEvent event : playerState.getEvents()) {
