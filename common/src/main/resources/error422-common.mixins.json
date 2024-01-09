@@ -1,19 +1,23 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "me.qboi.mods.err422.mixin.common",
+  "package": "io.github.xypercode.mods.err422.mixin.common",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "ResourceManagerMixin",
+    "ServerGamePacketListenerImplMixin",
     "ShapedRecipeMixin"
   ],
   "client": [
     "AbstractWidgetMixin",
+    "DebugGuiMixin",
     "GuiMixin",
     "ImageButtonMixin",
     "KeyMappingAccessor",
     "LoadingOverlayAccessor",
     "LogoTextureMixin",
-    "TitleScreenMixin"
+    "TitleScreenMixin",
+    "WindowMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -1,11 +1,12 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "me.qboi.mods.err422.mixin.fabric",
+  "package": "io.github.xypercode.mods.err422.mixin.fabric",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
   ],
   "client": [
+    "TitleScreenFabricMixin"
   ],
   "injectors": {
     "defaultRequire": 1

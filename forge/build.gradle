@@ -9,6 +9,12 @@ architectury {
 
 loom {
     accessWidenerPath = project(":common").loom.accessWidenerPath
+
+    forge {
+        convertAccessWideners = true
+        extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
+    }
+
     runs {
         client {
             programArgs "-mixin.config=ultreonlib-common.mixins.json"
@@ -28,10 +34,10 @@ configurations {
 dependencies {
     forge "net.minecraftforge:forge:${rootProject.forge_version}"
     // Remove the next line if you don't want to depend on the API
-    modApi "dev.architectury:architectury-forge:${rootProject.architectury_version}"
+    modApi("dev.architectury:architectury-forge:${rootProject.architectury_version}")
 
-    modApi "com.ultreon.mods:ultreon-lib-forge:1.1.0"
-    modApi 'com.github.Ultreon.advanced-debug:advanced-debug-forge:9b626785f7'
+    modApi("com.ultreon.mods:ultreon-lib-forge:1.1.0")
+    modApi('com.github.Ultreon.advanced-debug:advanced-debug-forge:9b626785f7')
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
@@ -50,34 +56,17 @@ shadowJar {
     exclude "architectury.common.json"
 
     configurations = [project.configurations.shadowCommon]
-    classifier "dev-shadow"
+    archiveClassifier = "dev-shadow"
 }
 
 remapJar {
     input.set shadowJar.archiveFile
     dependsOn shadowJar
-    classifier null
-    finalizedBy "obfJar"
+    archiveClassifier = null
 }
 
 jar {
-    classifier "dev"
-}
-
-tasks.register('obfJar', Jar) {
-    dependsOn remapJar
-    classifier "obf"
-
-    doLast {
-        FileOutputStream output = new FileOutputStream(outputs.files.singleFile)
-        output.write(new byte[]{0x50, 0x4B, 0x03, 0x04})
-        output.flush()
-        FileInputStream input = new FileInputStream("$projectDir/build/libs/${archiveBaseName.get()}-${version}.jar")
-        def inJar = input.readAllBytes()
-        output.write(inJar)
-        output.flush()
-        output.close()
-    }
+    archiveClassifier = "dev"
 }
 
 sourcesJar {

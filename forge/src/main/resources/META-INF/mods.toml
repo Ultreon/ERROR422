@@ -11,7 +11,7 @@ loaderVersion = "[43,)" #mandatory This is typically bumped every Minecraft vers
 # Review your options at https://choosealicense.com/. All rights reserved is the default copyright stance, and is thus the default here.
 license = "All Rights Reserved"
 # A URL to refer people to when problems occur with this mod
-issueTrackerURL = "https://github.com/Qboi123/error-422-ported"
+issueTrackerURL = "https://github.com/XyperCode/error-422-ported"
 # A list of mods - how many allowed here is determined by the individual mod loader
 [[mods]] #mandatory
 # The modid of the mod
@@ -25,13 +25,13 @@ displayName = "ERROR 422" #mandatory
 # A URL to query for updates for this mod. See the JSON update specification <here>
 #updateJSONURL="http://myurl.me/" #optional
 # A URL for the "homepage" for this mod, displayed in the mod UI
-displayURL = "https://qboi123.github.io/"
+displayURL = "https://ultreon.github.io/?id=error422#project" #optional
 # A file name (in the root of the mod JAR) containing a logo for display
 logoFile = "icon.png" #optional
 # A text field displayed in the mod UI
 #credits="Thanks for this example mod goes to Java" #optional
 # A text field displayed in the mod UI
-authors = "GlitchyCoder, Qboi" #optional
+authors = "XyperCode" #optional
 # Display Test controls the display for your mod in the server connection screen
 # MATCH_VERSION means that your mod will cause a red X if the versions on client and server differ. This is the default behaviour and should be what you choose if you have server and client elements to your mod.
 # IGNORE_SERVER_VERSION means that your mod will not cause a red X if it's present on the server but not on the client. This is what you should use if you're a server only mod.
@@ -61,6 +61,6 @@ side = "BOTH"
 modId = "minecraft"
 mandatory = true
 # This version range declares a minimum of the current minecraft version up to but not including the next major version
-versionRange = "[1.19.2,1.19.3)"
+versionRange = "1.19.2"
 ordering = "NONE"
 side = "BOTH"

@@ -5,23 +5,23 @@
   "name": "ERROR 422",
   "description": "ERROR 422 is the scariest version of Minecraft.",
   "authors": [
-    "GlitchyCoder",
-    "Qboi"
+    "XyperCode"
   ],
   "contact": {
-    "website": "https://qboi123.github.io/",
-    "repo": "https://github.com/Qboi123/error-422-ported",
-    "issues": "https://github.com/Qboi123/error-422-ported"
+    "website": "https://XyperCode.github.io/",
+    "repo": "https://github.com/XyperCode/error-422-ported",
+    "issues": "https://github.com/XyperCode/error-422-ported"
   },
   "license": "All-Rights-Reserved",
   "icon": "icon.png",
   "environment": "*",
+  "accessWidener": "error422.accesswidener",
   "entrypoints": {
     "main": [
-      "me.qboi.mods.err422.fabric.Error422PortedFabric"
+      "io.github.xypercode.mods.err422.fabric.Error422PortedFabric"
     ],
     "client": [
-      "me.qboi.mods.err422.fabric.Error422PortedFabricClient"
+      "io.github.xypercode.mods.err422.fabric.Error422PortedFabricClient"
     ]
   },
   "mixins": [
@@ -30,6 +30,6 @@
   ],
   "depends": {
     "fabricloader": ">=0.14.11",
-    "minecraft": ">=1.19.2"
+    "minecraft": "1.19.2"
   }
 }
