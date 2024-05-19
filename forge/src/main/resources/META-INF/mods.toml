@@ -25,7 +25,7 @@ displayName = "ERROR 422" #mandatory
 # A URL to query for updates for this mod. See the JSON update specification <here>
 #updateJSONURL="http://myurl.me/" #optional
 # A URL for the "homepage" for this mod, displayed in the mod UI
-displayURL = "https://ultreon.github.io/?id=error422#project" #optional
+displayURL = "https://ultreon.dev/?id=error422#project" #optional
 # A file name (in the root of the mod JAR) containing a logo for display
 logoFile = "icon.png" #optional
 # A text field displayed in the mod UI

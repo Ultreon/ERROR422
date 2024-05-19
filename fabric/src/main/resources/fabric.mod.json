@@ -8,9 +8,9 @@
     "XyperCode"
   ],
   "contact": {
-    "website": "https://XyperCode.github.io/",
-    "repo": "https://github.com/XyperCode/error-422-ported",
-    "issues": "https://github.com/XyperCode/error-422-ported"
+    "website": "https://ultreon.dev/?id=error422#project",
+    "repo": "https://github.com/Ultreon/ERROR422",
+    "issues": "https://github.com/Ultreon/ERROR422/issues"
   },
   "license": "All-Rights-Reserved",
   "icon": "icon.png",
@@ -18,10 +18,10 @@
   "accessWidener": "error422.accesswidener",
   "entrypoints": {
     "main": [
-      "io.github.xypercode.mods.err422.fabric.Error422PortedFabric"
+      "dev.ultreon.mods.err422.fabric.ERROR422Fabric"
     ],
     "client": [
-      "io.github.xypercode.mods.err422.fabric.Error422PortedFabricClient"
+      "dev.ultreon.mods.err422.fabric.ERROR422FabricClient"
     ]
   },
   "mixins": [
