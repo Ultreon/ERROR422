@@ -1,5 +1,5 @@
 # ERROR 422
-JitPack: https://jitpack.io/#dev.ultreon/ERROR422
+[![](https://jitpack.io/v/dev.ultreon/ERROR422.svg)](https://jitpack.io/#dev.ultreon/ERROR422)
 
 ## How to Compile
 1. Download and install Adoptium JDK from https://adoptium.net/
