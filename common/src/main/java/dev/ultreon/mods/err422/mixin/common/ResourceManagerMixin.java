@@ -14,8 +14,8 @@ import java.util.List;
 public class ResourceManagerMixin {
     @Inject(method = "getResourceStack", at = @At("HEAD"), cancellable = true)
     public void err422$injectResourceStack(ResourceLocation par1, CallbackInfoReturnable<List<Resource>> cir) {
-        if (par1.equals(new ResourceLocation("sounds.json"))) {
-            cir.setReturnValue(ERROR422.getSoundList());
-        }
+//        if (par1.equals(new ResourceLocation("sounds.json"))) {
+//            cir.setReturnValue(ERROR422.getSoundList());
+//        }
     }
 }
