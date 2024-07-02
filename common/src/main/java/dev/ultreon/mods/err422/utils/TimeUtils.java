@@ -13,7 +13,7 @@ public class TimeUtils {
         int seconds = (int) duration.getSeconds();
         int seconds1 = (int) duration1.getSeconds();
 
-        return GameRNG.nextIntBetween(seconds, seconds1);
+        return GameRNG.nextIntBetween(seconds * 20, seconds1 * 20);
     }
 }
 

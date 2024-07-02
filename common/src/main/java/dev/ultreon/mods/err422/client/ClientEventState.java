@@ -4,7 +4,7 @@ import dev.ultreon.mods.err422.EventStateProperty;
 import dev.ultreon.mods.err422.anticheat.AntiGamemode;
 import dev.ultreon.mods.err422.anticheat.PlayerIdleDetector;
 import dev.ultreon.mods.err422.event.EventStateKey;
-import dev.ultreon.mods.err422.exception.PlayerNotExistentException;
+import dev.ultreon.mods.err422.exception.Code422;
 import dev.ultreon.mods.err422.init.ModSounds;
 import net.minecraft.CrashReport;
 import net.minecraft.client.Minecraft;
@@ -57,7 +57,7 @@ public class ClientEventState {
     }
 
     public static void onCrash() {
-        Minecraft.crash(new CrashReport("ERROR 422", new PlayerNotExistentException("Player doesn't exists.")));
+        Minecraft.crash(new CrashReport("ERROR 422", new Code422("Failed to process entity.")));
     }
 
     public static SoundInstance getGlitchSound() {

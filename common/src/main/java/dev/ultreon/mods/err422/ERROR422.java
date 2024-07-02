@@ -1,27 +1,31 @@
 package dev.ultreon.mods.err422;
 
 import com.google.common.base.Suppliers;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.common.*;
 import dev.architectury.networking.NetworkChannel;
 import dev.architectury.registry.level.entity.EntityAttributeRegistry;
+import dev.architectury.registry.registries.Registries;
 import dev.architectury.utils.Env;
 import dev.architectury.utils.EnvExecutor;
 import dev.ultreon.mods.err422.client.ClientEventState;
-import dev.ultreon.mods.err422.event.EventRegistry;
-import dev.ultreon.mods.err422.event.EventTicker;
-import dev.ultreon.mods.err422.event.EventStateKey;
+import dev.ultreon.mods.err422.event.*;
 import dev.ultreon.mods.err422.event.global.WorldEvent;
+import dev.ultreon.mods.err422.event.local.*;
 import dev.ultreon.mods.err422.init.ModEntityTypes;
 import dev.ultreon.mods.err422.init.ModSounds;
 import dev.ultreon.mods.err422.init.ModTags;
 import dev.ultreon.mods.err422.rng.GameRNG;
 import dev.ultreon.mods.err422.entity.glitch.GlitchEntity;
 import dev.ultreon.mods.err422.utils.DebugUtils;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
+import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffect;
@@ -66,6 +70,56 @@ public class ERROR422 {
             ERROR422.LOGGER.warn("Block replacements tag is gone...");
         }
 
+        CommandRegistrationEvent.EVENT.register((dispatcher, registry, selection) -> {
+            dispatcher.register(Commands.literal("error422")
+                    .requires(commandSourceStack -> commandSourceStack.hasPermission(4))
+                    .then(Commands.literal("local")
+                            .then(Commands.argument("event", ResourceLocationArgument.id())
+                                    .suggests((context, builder) -> {
+                                        for (ResourceLocation key : EventRegistry.getLocalKeys())
+                                            builder.suggest(key.toString());
+
+                                        return builder.buildFuture();
+                                    })
+                                    .then(Commands.literal("skip")
+                                            .then(Commands.argument("ticks", IntegerArgumentType.integer(20, 72000))
+                                                    .executes(context -> {
+                                                        ResourceLocation eventId = ResourceLocationArgument.getId(context, "event");
+                                                        int skipTicks = IntegerArgumentType.getInteger(context, "ticks");
+                                                        LocalEvent local = EventRegistry.getLocal(eventId);
+                                                        local.skip(skipTicks);
+
+                                                        return 1;
+                                                    })
+                                            )
+                                    )
+                            )
+                    )
+                    .then(Commands.literal("global")
+                            .then(Commands.argument("event", ResourceLocationArgument.id())
+                                    .suggests((context, builder) -> {
+                                        for (ResourceLocation key : EventRegistry.getGlobalKeys())
+                                            builder.suggest(key.toString());
+
+                                        return builder.buildFuture();
+                                    })
+                                    .then(Commands.literal("skip")
+                                            .then(Commands.argument("ticks", IntegerArgumentType.integer(20, 72000))
+                                                    .executes(context -> {
+                                                        ResourceLocation eventId = ResourceLocationArgument.getId(context, "event");
+                                                        int skipTicks = IntegerArgumentType.getInteger(context, "ticks");
+                                                        GlobalEvent global = EventRegistry.getGlobal(eventId);
+                                                        global.skip(skipTicks);
+
+                                                        return 1;
+                                                    })
+                                            )
+                                    )
+                            )
+                    )
+            );
+        });
+
         for (final Item item : Registry.ITEM.stream().toList()) {
             if (null == item) continue;
             ERROR422.VALID_ITEMS_FOR_RANDOM.add(item);
@@ -88,6 +142,11 @@ public class ERROR422 {
         ModSounds.register();
 
         EventRegistry.register(res("world"), new WorldEvent());
+        EventRegistry.register(res("affect_surround"), new AffectSurroundingsEvent());
+        EventRegistry.register(res("error_dump"), new ErrorDumpEvent());
+        EventRegistry.register(res("glitch"), new GlitchEvent());
+        EventRegistry.register(res("final_attack"), new FinalAttackEvent());
+        EventRegistry.register(res("random_potion"), new RandomPotionEvent());
 
         EntityAttributeRegistry.register(ModEntityTypes.ERR422, GlitchEntity::createAttributes);
     }
@@ -121,7 +180,7 @@ public class ERROR422 {
     }
 
     public static List<MobEffect> getEffectiveEffects() {
-        return Collections.unmodifiableList(EFFECTIVE_EFFECTS);
+        return Collections.unmodifiableList(Registry.MOB_EFFECT.stream().toList());
     }
 
     public static List<Block> getReplacementBlocks() {
@@ -140,7 +199,7 @@ public class ERROR422 {
         final ItemStack itemStack;
         if (null == recipeReplacement) {
             final Object e = getValidItemsForRandom().get(GameRNG.nextInt(getValidItemsForRandom().size()));
-            itemStack = recipeReplacement = e instanceof Block ? new ItemStack((Block)e, 1) : new ItemStack((Item)e, 1);
+            itemStack = recipeReplacement = e instanceof Block ? new ItemStack((Block) e, 1) : new ItemStack((Item) e, 1);
         } else {
             itemStack = recipeReplacement;
             recipeReplacement = null;

@@ -11,7 +11,7 @@ import java.time.Duration;
 
 public class RandomPotionEvent extends LocalEvent {
     public RandomPotionEvent() {
-        super(Range.open(Duration.ofMinutes(15), Duration.ofMinutes(18)));
+        super(Range.open(Duration.ofMinutes(10), Duration.ofMinutes(15)));
     }
 
     @Override

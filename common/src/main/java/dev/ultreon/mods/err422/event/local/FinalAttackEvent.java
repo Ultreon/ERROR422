@@ -31,13 +31,13 @@ public class FinalAttackEvent extends LocalEvent {
         switch (state.getAttackType()) {
             case ATTACKER -> {
                 // Move to affected player.
-                theGlitch = new GlitchEntity(ModEntityTypes.ERR422.get(), state.getWorld());
+                theGlitch = new GlitchEntity(ModEntityTypes.ERR422.get(), state.getWorld(), state);
                 theGlitch.moveTo(state.getHolder().getX(), state.getHolder().getY(), state.getHolder().getZ(), 0.0f, 0.0f);
             }
             case CRASHER -> {
                 if (Minecraft.getInstance().hitResult != null) {
                     // Create entity
-                    theGlitch = new GlitchEntity(ModEntityTypes.ERR422.get(), state.getWorld());
+                    theGlitch = new GlitchEntity(ModEntityTypes.ERR422.get(), state.getWorld(), state);
 
                     // Mark return player position
                     state.lastPlayerPosX = state.getHolder().getX();

@@ -12,6 +12,7 @@ public sealed abstract class GameplayEvent<State extends EventState<Holder>, Hol
 
     protected GameplayEvent(Range<Duration> durationRange) {
         this.durationRange = durationRange;
+        this.next();
     }
 
     final void next() {
@@ -35,5 +36,9 @@ public sealed abstract class GameplayEvent<State extends EventState<Holder>, Hol
 
     protected void onTick(Holder holder, State state) {
 
+    }
+
+    public void skip(int skipTicks) {
+        nextEvent -= skipTicks;
     }
 }

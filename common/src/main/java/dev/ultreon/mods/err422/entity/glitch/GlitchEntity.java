@@ -7,6 +7,7 @@ import dev.ultreon.mods.err422.event.LocalEventState;
 import dev.ultreon.mods.err422.init.ModSounds;
 import dev.ultreon.mods.err422.utils.DebugUtils;
 import dev.ultreon.mods.err422.utils.TimeUtils;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
@@ -44,11 +45,16 @@ public class GlitchEntity extends PathfinderMob {
     private double stayZ;
     private boolean positionSet;
     private boolean disappeared;
-    private LocalEventState state;
+    private final LocalEventState state;
 
     public GlitchEntity(EntityType<? extends GlitchEntity> type, Level world) {
+        this(type, world, new LocalEventState(Util.NIL_UUID));
+    }
+
+    public GlitchEntity(EntityType<? extends GlitchEntity> type, Level world, LocalEventState state) {
         super(type, world);
         this.attackType = state.getAttackType();
+        this.state = state;
         this.setLastHurtMob(state.getHolder());
         state.setGlitchXRot(state.getHolder().getXRot());
         state.setGlitchYRot(state.getHolder().getYRot());

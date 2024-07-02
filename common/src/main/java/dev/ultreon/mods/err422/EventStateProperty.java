@@ -16,7 +16,8 @@ public record EventStateProperty<T>(EventStateKey<T> key, T value) {
         return create(key, decode);
     }
 
+    @SuppressWarnings("unchecked")
     private static <T> EventStateProperty<T> create(EventStateKey<T> key, Object decode) {
-        return new EventStateProperty<T>(key, (T) decode);
+        return new EventStateProperty<>(key, (T) decode);
     }
 }

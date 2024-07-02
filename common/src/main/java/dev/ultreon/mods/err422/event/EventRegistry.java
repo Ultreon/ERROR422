@@ -27,4 +27,12 @@ public class EventRegistry {
         else if (evt instanceof LocalEvent localEvent) return localEvents.inverse().get(localEvent);
         else throw new UnsupportedOperationException("Gameplay Event is neither local or global.");
     }
+
+    public static Iterable<? extends ResourceLocation> getLocalKeys() {
+        return localEvents.keySet();
+    }
+
+    public static Iterable<? extends ResourceLocation> getGlobalKeys() {
+        return globalEvents.keySet();
+    }
 }
