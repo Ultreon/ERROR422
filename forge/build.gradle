@@ -45,15 +45,6 @@ dependencies {
         exclude group: "com.google.gson"
         exclude group: "com.google"
     }
-    modApi('com.github.Ultreon.advanced-debug:advanced-debug-forge:9b626785f7') {
-        exclude group: "org.lwjgl"
-        exclude group: "org.lwjgl.lwjgl"
-        exclude group: "com.google.code"
-        exclude group: "com.google.guava"
-        exclude group: "com.google.protobuf"
-        exclude group: "com.google.gson"
-        exclude group: "com.google"
-    }
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }

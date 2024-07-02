@@ -35,8 +35,6 @@ dependencies {
     modImplementation 'com.electronwill.night-config:core:3.6.5'
     modImplementation 'com.electronwill.night-config:toml:3.6.5'
 
-    modApi 'com.github.Ultreon.advanced-debug:advanced-debug-fabric:9b626785f7'
-
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
 
