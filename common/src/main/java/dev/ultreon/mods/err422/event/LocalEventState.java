@@ -3,7 +3,10 @@ package dev.ultreon.mods.err422.event;
 import com.ultreon.mods.lib.util.ServerLifecycle;
 import dev.ultreon.mods.err422.ERROR422;
 import dev.ultreon.mods.err422.entity.glitch.GlitchAttackType;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -20,6 +23,7 @@ public class LocalEventState implements EventState<ServerPlayer> {
     private float glitchXRot;
     private float glitchYRot;
     private GlitchAttackType attackType;
+    Object2IntMap<LocalEvent> timestamps = new Object2IntOpenHashMap<>();
 
     public LocalEventState(UUID uuid) {
         this.uuid = uuid;

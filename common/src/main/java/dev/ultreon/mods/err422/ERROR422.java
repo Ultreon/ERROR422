@@ -6,7 +6,6 @@ import dev.architectury.event.EventResult;
 import dev.architectury.event.events.common.*;
 import dev.architectury.networking.NetworkChannel;
 import dev.architectury.registry.level.entity.EntityAttributeRegistry;
-import dev.architectury.registry.registries.Registries;
 import dev.architectury.utils.Env;
 import dev.architectury.utils.EnvExecutor;
 import dev.ultreon.mods.err422.client.ClientEventState;
@@ -25,7 +24,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
-import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffect;
@@ -87,7 +85,7 @@ public class ERROR422 {
                                                         ResourceLocation eventId = ResourceLocationArgument.getId(context, "event");
                                                         int skipTicks = IntegerArgumentType.getInteger(context, "ticks");
                                                         LocalEvent local = EventRegistry.getLocal(eventId);
-                                                        local.skip(skipTicks);
+                                                        local.skip(EventHandler.get().getState(context.getSource().getPlayerOrException()), skipTicks);
 
                                                         return 1;
                                                     })
@@ -109,7 +107,7 @@ public class ERROR422 {
                                                         ResourceLocation eventId = ResourceLocationArgument.getId(context, "event");
                                                         int skipTicks = IntegerArgumentType.getInteger(context, "ticks");
                                                         GlobalEvent global = EventRegistry.getGlobal(eventId);
-                                                        global.skip(skipTicks);
+                                                        global.skip(EventHandler.get().getGlobalState(), skipTicks);
 
                                                         return 1;
                                                     })

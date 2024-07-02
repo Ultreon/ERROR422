@@ -28,18 +28,40 @@ public class EventHandler {
         ticks++;
         MinecraftServer currentServer = ServerLifecycle.getCurrentServer();
         for (ServerPlayer player : currentServer.getPlayerList().getPlayers()) {
-            LocalEventState localEventState = LOCAL_EVENT_STATES.computeIfAbsent(player.getUUID(), LocalEventState::new);
+            UUID uuid = player.getUUID();
+            LocalEventState state = LOCAL_EVENT_STATES.get(uuid);
+            boolean brandNew = false;
+            if (state == null) {
+                brandNew = true;
+                state = new LocalEventState(uuid);
+                LOCAL_EVENT_STATES.put(uuid, state);
+            }
+
             for (ResourceLocation location : EventRegistry.getLocalKeys()) {
                 LocalEvent local = EventRegistry.getLocal(location);
-                local.tick(localEventState);
+                if (brandNew) {
+                    local.next(state);
+                }
+                local.tick(state);
             }
         }
 
         for (ResourceLocation location : EventRegistry.getGlobalKeys()) {
             GlobalEvent global = EventRegistry.getGlobal(location);
+            if (global.brandNew) {
+                global.brandNew = false;
+                global.next(GLOBAL_EVENT_STATE);
+            }
             global.tick(GLOBAL_EVENT_STATE);
         }
     }
 
+    public LocalEventState getState(ServerPlayer player) {
+        return LOCAL_EVENT_STATES.get(player.getUUID());
+    }
+
+    public GlobalEventState getGlobalState() {
+        return GLOBAL_EVENT_STATE;
+    }
 }
 
