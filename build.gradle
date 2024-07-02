@@ -19,7 +19,7 @@ forgix {
     forge {
         projectName = "forge"
         // This is the name of the forge project. If this property is not defined then by default it'll set to "forge" since that's the name the Architectury Template uses.
-        jarLocation = "build/libs/error-422-ported-${mod_version}.jar"
+        jarLocation = "build/libs/ERROR422-${mod_version}.jar"
         // This is the location of the forge jar from the forge project. If this property is not defined then by default it fetches the jar with the shortest name.
 
         mixin "error422.mixins.json" // This is in case if we didn't auto detect the forge mixins.
@@ -29,7 +29,7 @@ forgix {
     fabric {
         projectName = "fabric"
         // This is the name of the fabric project. If this property is not defined then by default it'll set to "fabric" since that's the name the Architectury Template uses.
-        jarLocation = "build/libs/error-422-ported-${mod_version}.jar"
+        jarLocation = "build/libs/ERROR422-${mod_version}.jar"
         // This is the location of the fabric jar from the fabric project. If this property is not defined then by default it fetches the jar with the shortest name.
     }
 }

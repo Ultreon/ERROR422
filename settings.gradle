@@ -7,6 +7,8 @@ pluginManagement {
     }
 }
 
+rootProject.name = "ERROR422"
+
 include("common")
 include("fabric")
 include("forge")
