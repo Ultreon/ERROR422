@@ -15,7 +15,6 @@
   "license": "All-Rights-Reserved",
   "icon": "icon.png",
   "environment": "*",
-  "accessWidener": "error422.accesswidener",
   "entrypoints": {
     "main": [
       "dev.ultreon.mods.err422.fabric.ERROR422Fabric"

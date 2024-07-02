@@ -1,38 +1,32 @@
 package dev.ultreon.mods.err422;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import dev.architectury.event.CompoundEventResult;
+import com.google.common.base.Suppliers;
 import dev.architectury.event.EventResult;
-import dev.architectury.event.events.client.ClientChatEvent;
-import dev.architectury.event.events.client.ClientGuiEvent;
-import dev.architectury.event.events.common.BlockEvent;
-import dev.architectury.event.events.common.ChatEvent;
-import dev.architectury.event.events.common.PlayerEvent;
-import dev.architectury.event.events.common.TickEvent;
-import dev.architectury.platform.Platform;
+import dev.architectury.event.events.common.*;
+import dev.architectury.networking.NetworkChannel;
 import dev.architectury.registry.level.entity.EntityAttributeRegistry;
+import dev.architectury.utils.Env;
+import dev.architectury.utils.EnvExecutor;
+import dev.ultreon.mods.err422.client.ClientEventState;
+import dev.ultreon.mods.err422.event.EventRegistry;
 import dev.ultreon.mods.err422.event.EventTicker;
+import dev.ultreon.mods.err422.event.EventStateKey;
+import dev.ultreon.mods.err422.event.global.WorldEvent;
 import dev.ultreon.mods.err422.init.ModEntityTypes;
 import dev.ultreon.mods.err422.init.ModSounds;
 import dev.ultreon.mods.err422.init.ModTags;
 import dev.ultreon.mods.err422.rng.GameRNG;
 import dev.ultreon.mods.err422.entity.glitch.GlitchEntity;
 import dev.ultreon.mods.err422.utils.DebugUtils;
-import dev.ultreon.mods.err422.utils.Manager;
-import net.fabricmc.api.EnvType;
-import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.TitleScreen;
-import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -42,32 +36,58 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 @SuppressWarnings("ALL")
 public class ERROR422 {
     public static final String MOD_ID = "error422";
     public static final Logger LOGGER = LoggerFactory.getLogger("ERROR422");
+    public static final char[] VALID_CHARACTERS = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_'abcdefghijklmnopqrstuvwxyz{|}~⌂ÇüéâäàåçêëèïîìÄÅÉæÆôöòûùÿÖÜø£Ø×ƒáíóúñÑ".toCharArray();
+    public static final char[] NUMBERS = "0123456789".toCharArray();
+    public static final String RANDOMIZED_MC_VERSION = String.format("1.%s.%s", NUMBERS[GameRNG.nextInt(NUMBERS.length)], NUMBERS[GameRNG.nextInt(NUMBERS.length)]);
+    public static final List<MobEffect> EFFECTIVE_EFFECTS = new ArrayList<>();
+    private static final List<Block> REPLACEMENT_BLOCKS = new ArrayList<>();
+    private static final List<Object> VALID_ITEMS_FOR_RANDOM = new ArrayList<>();
+    private static Supplier<NetworkChannel> channel = Suppliers.memoize(() -> NetworkChannel.create(res("main")));
+    public static ItemStack recipeReplacement;
 
     public static void init() throws InterruptedException, InvocationTargetException {
-        if (Platform.getEnv() == EnvType.SERVER) {
-            Runtime.getRuntime().halt(69); // Error 422 should not be ran on the server.
+        Optional<HolderSet.Named<Block>> tag = Registry.BLOCK.getTag(ModTags.Blocks.BLOCK_REPLACEMENTS);
+        if (tag.isPresent()) {
+            for (final Holder<Block> block : tag.get()) {
+                ERROR422.REPLACEMENT_BLOCKS.add(block.value());
+                ERROR422.VALID_ITEMS_FOR_RANDOM.add(block.value());
+            }
+        } else {
+            ERROR422.LOGGER.warn("Block replacements tag is gone...");
+        }
+
+        for (final Item item : Registry.ITEM.stream().toList()) {
+            if (null == item) continue;
+            ERROR422.VALID_ITEMS_FOR_RANDOM.add(item);
         }
 
         TickEvent.SERVER_POST.register(server -> EventTicker.getInstance().tick());
         ChatEvent.RECEIVED.register((player, component) -> EventResult.interrupt(!DebugUtils.handleCheatCode(component.getString())));
-        PlayerEvent.PLAYER_JOIN.register(ERROR422::joinPlayer);
-        PlayerEvent.PLAYER_QUIT.register(ERROR422::quitPlayer);
 
-        ClientChatEvent.RECEIVED.register((type, message) -> CompoundEventResult.pass());
-
-        ClientGuiEvent.RENDER_PRE.register(ERROR422::preRender);
+        LifecycleEvent.SETUP.register(() -> {
+            NetworkChannel networkChannel = channel.get();
+            networkChannel.register(EventStateProperty.class, EventStateProperty::encode, EventStateProperty::decode, (eventStateProperty, packetContextSupplier) -> {
+                EnvExecutor.runInEnv(Env.CLIENT, () -> () -> ClientEventState.handle(eventStateProperty));
+            });
+        });
 
         BlockEvent.PLACE.register(ERROR422::placeBlock);
 
         ModEntityTypes.register();
         ModTags.register();
         ModSounds.register();
+
+        EventRegistry.register(res("world"), new WorldEvent());
 
         EntityAttributeRegistry.register(ModEntityTypes.ERR422, GlitchEntity::createAttributes);
     }
@@ -76,63 +96,14 @@ public class ERROR422 {
         return new ResourceLocation(MOD_ID, path);
     }
 
-    private static EventResult preRender(Screen type, PoseStack poseStack, int i, int i1, float v) {
-        if (type instanceof TitleScreen screen) {
-            screen.children().forEach(ERROR422::modifyTitleScreen);
-        }
-        if (type instanceof CreateWorldScreen screen) {
-            screen.children().forEach(ERROR422::modifyCreateWorldScreen);
-        }
-        return EventResult.pass();
-    }
-
-    private static void modifyCreateWorldScreen(GuiEventListener listener) {
-        if (!(listener instanceof Button) && listener instanceof AbstractWidget widget) {
-            widget.active = false;
-        }
-
-        if (listener instanceof Button button
-                && button.getMessage() instanceof MutableComponent component
-                && component.getContents() instanceof TranslatableContents contents) {
-            String key = contents.getKey();
-            if (!key.equals("selectWorld.create") && !key.equals("gui.cancel")) {
-                button.active = false;
-            }
-        }
-    }
-
-    private static void modifyTitleScreen(GuiEventListener guiEventListener) {
-        if (!(guiEventListener instanceof Button) && guiEventListener instanceof AbstractWidget widget) {
-            widget.active = false;
-        }
-        if (guiEventListener instanceof Button button
-                && button.getMessage() instanceof MutableComponent component
-                && component.getContents() instanceof TranslatableContents contents) {
-            String key = contents.getKey();
-            if (!key.equals("menu.quit") && !key.equals("menu.singleplayer") && !key.equals("menu.playdemo")) {
-                button.active = false;
-            }
-        }
-    }
-
-    private static void quitPlayer(ServerPlayer player) {
-        Manager.setAffectedPlayer(null);
-        Manager.setWorld(null);
-    }
-
-    private static void joinPlayer(ServerPlayer player) {
-        Manager.selectLastPlayer();
-        Manager.setWorld(player.getLevel());
-    }
-
     private static EventResult placeBlock(Level level, BlockPos pos, BlockState state, @Nullable Entity placer) {
         if (placer instanceof ServerPlayer player) {
             ItemStack mainHandItem = player.getMainHandItem();
             if (GameRNG.nextInt(100) == 0 && !mainHandItem.isEmpty()) {
                 Block replacement = null;
-                for (Block block : Manager.getReplacementBlocks()) {
+                for (Block block : getReplacementBlocks()) {
                     if (block.asItem() != mainHandItem.getItem()) continue;
-                    replacement = Manager.getReplacementBlock();
+                    replacement = getReplacementBlock();
                 }
 
                 if (replacement != null) {
@@ -144,7 +115,44 @@ public class ERROR422 {
         return EventResult.pass();
     }
 
-    public static List<Resource> getSoundList() {
-        return Manager.soundList;
+    public static <T> void send(ServerPlayer player, EventStateKey<T> key, T value) {
+        NetworkChannel networkChannel = channel.get();
+        networkChannel.sendToPlayer(player, new EventStateProperty<T>(key, value));
+    }
+
+    public static List<MobEffect> getEffectiveEffects() {
+        return Collections.unmodifiableList(EFFECTIVE_EFFECTS);
+    }
+
+    public static List<Block> getReplacementBlocks() {
+        return Collections.unmodifiableList(REPLACEMENT_BLOCKS);
+    }
+
+    public static List<Object> getValidItemsForRandom() {
+        return Collections.unmodifiableList(VALID_ITEMS_FOR_RANDOM);
+    }
+
+    public static Block getReplacementBlock() {
+        return ERROR422.getReplacementBlocks().get(GameRNG.nextInt(ERROR422.getReplacementBlocks().size()));
+    }
+
+    public static ItemStack randomItem() {
+        final ItemStack itemStack;
+        if (null == recipeReplacement) {
+            final Object e = getValidItemsForRandom().get(GameRNG.nextInt(getValidItemsForRandom().size()));
+            itemStack = recipeReplacement = e instanceof Block ? new ItemStack((Block)e, 1) : new ItemStack((Item)e, 1);
+        } else {
+            itemStack = recipeReplacement;
+            recipeReplacement = null;
+        }
+        return itemStack;
+    }
+
+    public static ItemStack getRecipeReplacement() {
+        return recipeReplacement;
+    }
+
+    public static void setRecipeReplacement(ItemStack recipeReplacement) {
+        ERROR422.recipeReplacement = recipeReplacement;
     }
 }

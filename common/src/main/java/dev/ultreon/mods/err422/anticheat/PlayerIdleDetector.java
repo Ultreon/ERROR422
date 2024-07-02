@@ -1,6 +1,6 @@
 package dev.ultreon.mods.err422.anticheat;
 
-import dev.ultreon.mods.err422.utils.Manager;
+import dev.ultreon.mods.err422.client.ClientEventState;
 import dev.ultreon.mods.err422.utils.TimeUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.PauseScreen;
@@ -14,7 +14,7 @@ public class PlayerIdleDetector {
     public static void tick() {
         boolean keys = false;
         for (int i = GLFW.GLFW_KEY_SPACE; i < GLFW.GLFW_KEY_LAST; i++) {
-            keys |= GLFW.glfwGetKey(Manager.getWindow(), GLFW.GLFW_KEY_SPACE) == 1;
+            keys |= GLFW.glfwGetKey(ClientEventState.getWindow(), GLFW.GLFW_KEY_SPACE) == 1;
         }
         if (keys) {
             if (!anyKeyPressed) {

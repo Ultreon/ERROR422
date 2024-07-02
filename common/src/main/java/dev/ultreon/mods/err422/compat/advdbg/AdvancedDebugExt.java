@@ -11,7 +11,7 @@ import dev.ultreon.mods.err422.ERROR422;
 public class AdvancedDebugExt implements Extension {
     @Override
     public void initPages(IInitPagesEvent initEvent) {
-        if (Platform.isDevelopmentEnvironment()) initEvent.register(new Error422DebugPage(ERROR422.MOD_ID, "main"));
+
     }
 
     @Override

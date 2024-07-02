@@ -1,8 +1,9 @@
 package dev.ultreon.mods.err422.mixin.forge;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.ultreon.mods.err422.ERROR422;
+import dev.ultreon.mods.err422.client.ClientEventState;
 import dev.ultreon.mods.err422.rng.GameRNG;
-import dev.ultreon.mods.err422.utils.Manager;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -41,12 +42,12 @@ public abstract class TitleScreenForgeMixin extends Screen {
         float g = this.fading ? (Util.getMillis() - this.fadeInStart) / 1000.0F : 1.0F;
         float h = this.fading ? Mth.clamp(g - 1.0F, 0.0F, 1.0F) : 1.0F;
         int n = Mth.ceil(h * 255.0F) << 24;
-        drawString(err422$poseStack, font, "§mMinecraft " + Manager.RANDOMIZED_MC_VERSION + " §r§cERR422§r", 2, this.height - 10, 16777215 | n);
+        drawString(err422$poseStack, font, "§mMinecraft " + ERROR422.RANDOMIZED_MC_VERSION + " §r§cERR422§r", 2, this.height - 10, 16777215 | n);
     }
 
     @Inject(at = @At(value = "RETURN"), method = "render")
     public void err422$injectGlitchRender(PoseStack poseStack, int mouseX, int mouseY, float partialTick, CallbackInfo ci) {
-        if (Manager.isGlitchActive()) {
+        if (ClientEventState.isGlitching()) {
             String[] glitchElements = new String[]{"java.lang.NullPointerException", "updateRenderer(EntityRenderer.java:450)", "renderWorld(EntityRenderer.java:870)", "refreshTextures(RenderEngine.java:41)", "createTexture(RenderEngine.java:216)", "renderEntity(§k??????????§r.java:870)", "getTexture(RenderEngine.java:612)", "refreshTextureMaps(?.java:130)", "updateLightmap(EntityRenderer.java:582)", "updateCameraAndRender(EntityRenderer.java:135)", "Minecraft.runGameLoop(Minecraft.java:385)", "Minecraft.run(Minecraft.java:521)", "java.lang.Thread.run(Thread.java:048)"};
             for (String string2 : glitchElements) {
                 Minecraft.getInstance().font.draw(poseStack, string2, GameRNG.nextInt(width), GameRNG.nextInt(height), 0xFF0000);

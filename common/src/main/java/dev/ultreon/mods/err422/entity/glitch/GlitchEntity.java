@@ -1,13 +1,14 @@
 package dev.ultreon.mods.err422.entity.glitch;
 
+import dev.ultreon.mods.err422.ERROR422;
 import dev.ultreon.mods.err422.event.EventHandler;
+import dev.ultreon.mods.err422.event.EventStateKey;
+import dev.ultreon.mods.err422.event.LocalEventState;
 import dev.ultreon.mods.err422.init.ModSounds;
 import dev.ultreon.mods.err422.utils.DebugUtils;
-import dev.ultreon.mods.err422.utils.Manager;
 import dev.ultreon.mods.err422.utils.TimeUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
@@ -43,17 +44,18 @@ public class GlitchEntity extends PathfinderMob {
     private double stayZ;
     private boolean positionSet;
     private boolean disappeared;
+    private LocalEventState state;
 
     public GlitchEntity(EntityType<? extends GlitchEntity> type, Level world) {
         super(type, world);
-        this.attackType = Manager.getAttackType();
-        this.setLastHurtMob(Manager.getAffectedPlayer());
-        Manager.setGlitchXRot(Manager.getAffectedPlayer().getXRot());
-        Manager.setGlitchYRot(Manager.getAffectedPlayer().getYRot());
+        this.attackType = state.getAttackType();
+        this.setLastHurtMob(state.getHolder());
+        state.setGlitchXRot(state.getHolder().getXRot());
+        state.setGlitchYRot(state.getHolder().getYRot());
 //        Utils.minecraft.options.anaglyph = true; // TODO: Use glitch shader from Kelvin285.
-        if (Manager.getAttackType() == GlitchAttackType.ATTACKER) {
+        if (state.getAttackType() == GlitchAttackType.ATTACKER) {
             this.disappearTicks = EventHandler.get().ticks + TimeUtils.minutesToTicks(1);
-        } else if (Manager.getAttackType() == GlitchAttackType.CRASHER) {
+        } else if (state.getAttackType() == GlitchAttackType.CRASHER) {
             Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(ModSounds.GLITCH422.get(), 100, 0.0f));
             this.disappearTicks = (long) EventHandler.get().ticks + 80L;
         }
@@ -213,7 +215,7 @@ public class GlitchEntity extends PathfinderMob {
 
     @Override
     public boolean canAttack(@NotNull LivingEntity livingEntity) {
-        if (Manager.getAttackType() == GlitchAttackType.CRASHER) {
+        if (state.getAttackType() == GlitchAttackType.CRASHER) {
             return false;
         }
 
@@ -228,10 +230,10 @@ public class GlitchEntity extends PathfinderMob {
     @Override
     public void tick() {
         super.tick();
-        if (Manager.getAffectedPlayer().isDeadOrDying()) this.disappear();
-        else Manager.setAttackType(this.attackType);
+        if (state.getHolder().isDeadOrDying()) this.disappear();
+        else state.setAttackType(this.attackType);
         
-        if (Manager.getAttackType() == null) return;
+        if (state.getAttackType() == null) return;
         
         if (!this.positionSet) {
             this.stayX = this.getX();
@@ -240,30 +242,27 @@ public class GlitchEntity extends PathfinderMob {
             this.positionSet = true;
         }
         
-        if (Manager.getAttackType() == GlitchAttackType.CRASHER) crashTick();
-        else if (Manager.getAttackType() == GlitchAttackType.ATTACKER) attackTick();
+        if (state.getAttackType() == GlitchAttackType.CRASHER) crashTick();
+        else if (state.getAttackType() == GlitchAttackType.ATTACKER) attackTick();
         
         this.setSpeed(0.3f);
         this.flyingSpeed = 0.15f;
         Objects.requireNonNull(getAttributes().getInstance(Attributes.ATTACK_DAMAGE), "Attack damage not present").setBaseValue(Double.MAX_VALUE);
-        if (this.getY() < Manager.getAffectedPlayer().getY() && Manager.getAttackType() != GlitchAttackType.CRASHER) {
+        if (this.getY() < state.getHolder().getY() && state.getAttackType() != GlitchAttackType.CRASHER) {
             this.setPos(this.getX(), this.getY() + 2.0, this.getZ());
         }
         final int setX = Mth.floor(this.getX());
         final int setY = Mth.floor(this.getY());
         final int setZ = Mth.floor(this.getZ());
-        if (Manager.getWorld().getBlockState(new BlockPos(setX, setY - 1, setZ)).getBlock() == Blocks.LAVA) {
-            Manager.getWorld().setBlock(new BlockPos(setX, setY, setZ), Blocks.WATER.defaultBlockState(), 0x2);
+        if (state.getWorld().getBlockState(new BlockPos(setX, setY - 1, setZ)).getBlock() == Blocks.LAVA) {
+            state.getWorld().setBlock(new BlockPos(setX, setY, setZ), Blocks.WATER.defaultBlockState(), 0x2);
         }
-        Manager.getWorld().setBlock(new BlockPos(setX, setY + 1, setZ), Blocks.AIR.defaultBlockState(), 0x2);
-        Manager.getWorld().setBlock(new BlockPos(setX, setY, setZ), Blocks.AIR.defaultBlockState(), 0x2);
+        state.getWorld().setBlock(new BlockPos(setX, setY + 1, setZ), Blocks.AIR.defaultBlockState(), 0x2);
+        state.getWorld().setBlock(new BlockPos(setX, setY, setZ), Blocks.AIR.defaultBlockState(), 0x2);
     }
 
     private void attackTick() {
-        @SuppressWarnings("unused") final SoundManager soundManager = Minecraft.getInstance().getSoundManager();
-        if (Manager.getGlitchSound() != null && !soundManager.isActive(Manager.getGlitchSound())) {
-            Manager.setGlitchSound(SimpleSoundInstance.forUI(ModSounds.GLITCH422.get(), 100f, 0f));
-        }
+        ERROR422.send(state.getHolder(), EventStateKey.CORRUPT, true);
         if (EventHandler.get().ticks >= this.disappearTicks) {
             this.disappear();
         }
@@ -272,7 +271,7 @@ public class GlitchEntity extends PathfinderMob {
     private void crashTick() {
         this.setDeltaMovement(0.0, 0.0, 0.0);
         if (EventHandler.get().ticks >= this.disappearTicks) {
-            Manager.onCrash();
+            ERROR422.send(state.getHolder(), EventStateKey.CRASH, true);
         }
         this.setPos(this.stayX, this.stayY, this.stayZ);
     }
@@ -282,23 +281,23 @@ public class GlitchEntity extends PathfinderMob {
         if (this.getHealth() <= 0) {
             this.dead = true;
             if (!this.disappeared) {
-                Manager.setAttackType(null);
-                for (Object e : Manager.getValidItemsForRandom()) {
+                state.setAttackType(null);
+                for (Object e : ERROR422.getValidItemsForRandom()) {
                     ItemStack itemStack = e instanceof Block block ? new ItemStack(block, 1) : new ItemStack((Item) e, 1);
-                    Manager.getWorld().addFreshEntity(new ItemEntity(Manager.getWorld(), this.getX(), this.getY() + 10.0, this.getZ(), itemStack));
+                    state.getWorld().addFreshEntity(new ItemEntity(state.getWorld(), this.getX(), this.getY() + 10.0, this.getZ(), itemStack));
                 }
             }
         }
     }
 
     public void disappear() {
-        Manager.setAttackType(null);
+        state.setAttackType(null);
         this.disappeared = true;
         this.setHealth(0);
         discard();
         this.disappearTicks = 0;
         if (DebugUtils.enabled) {
-            Manager.getAffectedPlayer().sendSystemMessage(Component.literal("ERR422 is disappeared."));
+            state.getHolder().sendSystemMessage(Component.literal("ERR422 is disappeared."));
         }
     }
 

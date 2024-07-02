@@ -3,8 +3,8 @@ package dev.ultreon.mods.err422.mixin.common;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ultreon.mods.err422.ERROR422;
+import dev.ultreon.mods.err422.client.Error422Client;
 import dev.ultreon.mods.err422.rng.GameRNG;
-import dev.ultreon.mods.err422.utils.Manager;
 import dev.ultreon.mods.err422.utils.TimeUtils;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -56,7 +56,7 @@ public abstract class TitleScreenMixin extends Screen {
     public void err422$injectPanoramaRender(PoseStack poseStack, int i, int j, float f, CallbackInfo ci) {
         fill(poseStack, 0, 0, width, height, 0xff000000);
         splash = null;
-        Manager.GLITCH_RENDERER.render(poseStack);
+        Error422Client.GLITCH_RENDERER.render(poseStack);
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/PanoramaRenderer;render(FF)V", ordinal = 0), method = "render")
@@ -66,7 +66,7 @@ public abstract class TitleScreenMixin extends Screen {
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/TitleScreen;blitOutlineBlack(IILjava/util/function/BiConsumer;)V", ordinal = 1, shift = At.Shift.BEFORE), method = "render")
     public void err422$injectRender(PoseStack poseStack, int i, int j, float f, CallbackInfo ci) {
-        Manager.GLITCH_RENDERER.reset();
+        Error422Client.GLITCH_RENDERER.reset();
         poseStack.pushPose();
         int n4 = this.width / 2 - 137;
         int n5 = 30;

@@ -1,8 +1,8 @@
 package dev.ultreon.mods.err422.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.ultreon.mods.err422.ERROR422;
 import dev.ultreon.mods.err422.rng.GameRNG;
-import dev.ultreon.mods.err422.utils.Manager;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
@@ -45,7 +45,7 @@ public class GlitchRenderer {
         width = Minecraft.getInstance().screen.width;
         height = Minecraft.getInstance().screen.height;
         for (int i = 0; i < (width / 6 + 1) * (height / 10); ++i) {
-            chars.add(Character.toString(Manager.VALID_CHARACTERS[GameRNG.nextInt(Manager.VALID_CHARACTERS.length)]));
+            chars.add(Character.toString(ERROR422.VALID_CHARACTERS[GameRNG.nextInt(ERROR422.VALID_CHARACTERS.length)]));
             colors.add(GameRNG.nextInt(0xFFFFFF));
         }
     }
