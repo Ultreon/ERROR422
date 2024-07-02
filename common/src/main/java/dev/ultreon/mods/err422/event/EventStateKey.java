@@ -12,6 +12,7 @@ public class EventStateKey<T> {
 
     public static final EventStateKey<Boolean> CRASH = new EventStateKey<>(boolean.class, FriendlyByteBuf::readBoolean, FriendlyByteBuf::writeBoolean);
     public static final EventStateKey<Boolean> CORRUPT = new EventStateKey<>(boolean.class, FriendlyByteBuf::readBoolean, FriendlyByteBuf::writeBoolean);
+    public static final EventStateKey<Boolean> ATTACK = new EventStateKey<>(boolean.class, FriendlyByteBuf::readBoolean, FriendlyByteBuf::writeBoolean);
     public static final EventStateKey<Boolean> GLITCH_ACTIVE = new EventStateKey<>(boolean.class, FriendlyByteBuf::readBoolean, FriendlyByteBuf::writeBoolean);
 
     private final int id;

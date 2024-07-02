@@ -3,6 +3,7 @@ package dev.ultreon.mods.err422.client;
 import dev.ultreon.mods.err422.EventStateProperty;
 import dev.ultreon.mods.err422.anticheat.AntiGamemode;
 import dev.ultreon.mods.err422.anticheat.PlayerIdleDetector;
+import dev.ultreon.mods.err422.event.EventHandler;
 import dev.ultreon.mods.err422.event.EventStateKey;
 import dev.ultreon.mods.err422.exception.Code422;
 import dev.ultreon.mods.err422.init.ModSounds;
@@ -42,7 +43,12 @@ public class ClientEventState {
         EventStateKey<?> key = property.key();
         if (key == EventStateKey.GLITCH_ACTIVE) setGlitching((boolean) property.value());
         else if (key == EventStateKey.CORRUPT) corrupt();
+        else if (key == EventStateKey.ATTACK) attack();
         else if (key == EventStateKey.CRASH) onCrash();
+    }
+
+    private static void attack() {
+        Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(ModSounds.GLITCH422.get(), 100, 0.0f));
     }
 
     private static void corrupt() {

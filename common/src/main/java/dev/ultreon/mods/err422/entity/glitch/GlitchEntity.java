@@ -9,9 +9,9 @@ import dev.ultreon.mods.err422.utils.DebugUtils;
 import dev.ultreon.mods.err422.utils.TimeUtils;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
@@ -62,8 +62,8 @@ public class GlitchEntity extends PathfinderMob {
         if (state.getAttackType() == GlitchAttackType.ATTACKER) {
             this.disappearTicks = EventHandler.get().ticks + TimeUtils.minutesToTicks(1);
         } else if (state.getAttackType() == GlitchAttackType.CRASHER) {
-            Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(ModSounds.GLITCH422.get(), 100, 0.0f));
-            this.disappearTicks = (long) EventHandler.get().ticks + 80L;
+            ERROR422.send(state.getHolder(), EventStateKey.ATTACK, true);
+            this.disappearTicks = EventHandler.get().ticks + 80L;
         }
     }
 
@@ -236,7 +236,12 @@ public class GlitchEntity extends PathfinderMob {
     @Override
     public void tick() {
         super.tick();
-        if (state.getHolder().isDeadOrDying()) this.disappear();
+        ServerPlayer holder = state.getHolder();
+        if (holder == null) {
+            this.disappear();
+            return;
+        }
+        if (holder.isDeadOrDying()) this.disappear();
         else state.setAttackType(this.attackType);
         
         if (state.getAttackType() == null) return;
@@ -254,7 +259,7 @@ public class GlitchEntity extends PathfinderMob {
         this.setSpeed(0.3f);
         this.flyingSpeed = 0.15f;
         Objects.requireNonNull(getAttributes().getInstance(Attributes.ATTACK_DAMAGE), "Attack damage not present").setBaseValue(Double.MAX_VALUE);
-        if (this.getY() < state.getHolder().getY() && state.getAttackType() != GlitchAttackType.CRASHER) {
+        if (this.getY() < holder.getY() && state.getAttackType() != GlitchAttackType.CRASHER) {
             this.setPos(this.getX(), this.getY() + 2.0, this.getZ());
         }
         final int setX = Mth.floor(this.getX());
