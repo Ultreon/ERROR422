@@ -4,7 +4,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ultreon.mods.err422.rng.GameRNG;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffects;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -15,11 +16,11 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import java.util.Objects;
 
 @Mixin(Gui.class)
-public abstract class GuiMixin extends GuiComponent {
+public abstract class GuiMixin {
     @Shadow @Final private Minecraft minecraft;
 
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;blit(Lcom/mojang/blaze3d/vertex/PoseStack;IIIIII)V"), method = "renderHeart")
-    private void err422$corruptHealthBar(Gui instance, PoseStack poseStack, int x, int y, int u, int v, int width, int height) {
+    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blit(Lnet/minecraft/resources/ResourceLocation;IIIIII)V"), method = "renderHeart")
+    private void err422$corruptHealthBar(GuiGraphics instance, ResourceLocation atlasLocation, int x, int y, int uOffset, int vOffset, int uWidth, int vHeight) {
         int texOff = GameRNG.nextInt(0xFFFFFFF);
 
         if (Objects.requireNonNull(this.minecraft.player).hasEffect(MobEffects.POISON)) {
@@ -29,11 +30,11 @@ public abstract class GuiMixin extends GuiComponent {
         }
 
         int offset = GameRNG.nextInt(2) == 0 ? GameRNG.nextInt(20) : -GameRNG.nextInt(20);
-        this.blit(poseStack, x + offset, y, texOff + u, v, width, height);
+        instance.blit(atlasLocation, x + offset, y, texOff + uOffset, vOffset, uWidth, vHeight);
     }
 
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;blit(Lcom/mojang/blaze3d/vertex/PoseStack;IIIIII)V"), method = "renderPlayerHealth")
-    private void err422$corruptHungerBar(Gui instance, PoseStack poseStack, int x, int y, int u, int v, int width, int height) {
+    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;blit(Lnet/minecraft/resources/ResourceLocation;IIIIII)V"), method = "renderPlayerHealth")
+    private void err422$corruptHungerBar(GuiGraphics instance, ResourceLocation atlasLocation, int x, int y, int uOffset, int vOffset, int uWidth, int vHeight) {
         int texOff = GameRNG.nextInt(0xFFFFFFF);
 
         if (Objects.requireNonNull(this.minecraft.player).hasEffect(MobEffects.POISON)) {
@@ -43,6 +44,6 @@ public abstract class GuiMixin extends GuiComponent {
         }
 
         int offset = GameRNG.nextInt(2) == 0 ? GameRNG.nextInt(20) : -GameRNG.nextInt(20);
-        this.blit(poseStack, x + offset, y, texOff + u, v, width, height);
+        instance.blit(atlasLocation, x + offset, y, texOff + uOffset, vOffset, uWidth, vHeight);
     }
 }

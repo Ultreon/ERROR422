@@ -4,18 +4,17 @@ import dev.ultreon.mods.err422.ERROR422;
 import dev.ultreon.mods.err422.event.EventHandler;
 import dev.ultreon.mods.err422.event.EventStateKey;
 import dev.ultreon.mods.err422.event.LocalEventState;
-import dev.ultreon.mods.err422.init.ModSounds;
 import dev.ultreon.mods.err422.utils.DebugUtils;
 import dev.ultreon.mods.err422.utils.TimeUtils;
 import net.minecraft.Util;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.EntityDamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -96,21 +95,18 @@ public class GlitchEntity extends PathfinderMob {
 
     @Override
     public boolean hurt(@NotNull DamageSource damageSource, float damage) {
-        if (this.isInvulnerableTo(damageSource) || this.level.isClientSide || this.isDeadOrDying()) return false;
-        if (damageSource.isFire() && this.hasEffect(MobEffects.FIRE_RESISTANCE)) return false;
-        if (this.isSleeping() && !this.level.isClientSide) this.stopSleeping();
+        if (this.isInvulnerableTo(damageSource) || this.level().isClientSide || this.isDeadOrDying()) return false;
+        if (damageSource.is(DamageTypeTags.IS_FIRE) && this.hasEffect(MobEffects.FIRE_RESISTANCE)) return false;
+        if (this.isSleeping() && !this.level().isClientSide) this.stopSleeping();
 
         this.noActionTime = 0;
         DamageSourceCheck check = getDamageSourceCheck(damageSource, damage);
 
-        this.animationSpeed = 1.5f;
         Boolean passHurt = shouldPassHurt(damageSource, check.damage());
 
         if (passHurt == null) return false;
-        if (damageSource.isDamageHelmet() && !this.getItemBySlot(EquipmentSlot.HEAD).isEmpty())
+        if (damageSource.is(DamageTypeTags.DAMAGES_HELMET) && !this.getItemBySlot(EquipmentSlot.HEAD).isEmpty())
             this.hurtHelmet(damageSource, check.damage());
-
-        this.hurtDir = 0.0f;
 
         Entity attacker = damageSource.getEntity();
         if (attacker != null) checkAttackerInfo(damageSource, attacker);
@@ -136,7 +132,7 @@ public class GlitchEntity extends PathfinderMob {
         if (damage > 0.0f && this.isDamageSourceBlocked(damageSource)) {
             this.hurtCurrentlyUsedShield(damage);
             damage = 0.0f;
-            if (!damageSource.isProjectile() && (damageSource.getDirectEntity()) instanceof LivingEntity livingEntity) {
+            if (!damageSource.is(DamageTypeTags.IS_PROJECTILE) && (damageSource.getDirectEntity()) instanceof LivingEntity livingEntity) {
                 this.blockUsingShield(livingEntity);
             }
             blocked = true;
@@ -148,7 +144,7 @@ public class GlitchEntity extends PathfinderMob {
     }
 
     private void checkAttackerInfo(@NotNull DamageSource damageSource, Entity attacker) {
-        if (attacker instanceof LivingEntity livingEntity && !damageSource.isNoAggro()) {
+        if (attacker instanceof LivingEntity livingEntity && !damageSource.is(DamageTypeTags.NO_ANGER)) {
             this.setLastHurtByMob(livingEntity);
         }
         if (attacker instanceof Player player) {
@@ -182,13 +178,13 @@ public class GlitchEntity extends PathfinderMob {
 
     private void doDamage(@NotNull DamageSource damageSource, boolean blocked, Entity entity2) {
         if (blocked) {
-            this.level.broadcastEntityEvent(this, (byte)29);
-        } else if (damageSource instanceof EntityDamageSource source && source.isThorns()) {
-            this.level.broadcastEntityEvent(this, (byte)33);
+            this.level().broadcastEntityEvent(this, (byte)29);
+        } else if (damageSource.is(DamageTypes.THORNS)) {
+            this.level().broadcastEntityEvent(this, (byte)33);
         } else {
             miscDamageHandle(damageSource);
         }
-        if (damageSource != DamageSource.DROWN && !blocked) {
+        if (damageSource.is(DamageTypes.DROWN) && !blocked) {
             this.markHurt();
         }
         if (entity2 != null) {
@@ -198,25 +194,22 @@ public class GlitchEntity extends PathfinderMob {
                 d = (Math.random() - Math.random()) * 0.01;
                 e = (Math.random() - Math.random()) * 0.01;
             }
-            this.hurtDir = (float)(Mth.atan2(e, d) * 57.2957763671875 - (double)this.getYRot());
             this.knockback(0.4f, d, e);
-        } else {
-            this.hurtDir = (int)(Math.random() * 2.0) * 180;
         }
     }
 
     private void miscDamageHandle(@NotNull DamageSource damageSource) {
         int eventId;
-        if (damageSource == DamageSource.DROWN) {
+        if (damageSource.is(DamageTypes.DROWN)) {
             eventId = 36;
-        } else if (damageSource.isFire()) {
+        } else if (damageSource.is(DamageTypeTags.IS_FIRE)) {
             eventId = 37;
-        } else if (damageSource == DamageSource.SWEET_BERRY_BUSH) {
+        } else if (damageSource.is(DamageTypes.SWEET_BERRY_BUSH)) {
             eventId = 44;
         } else {
-            eventId = damageSource == DamageSource.FREEZE ? 57 : 2;
+            eventId = damageSource.is(DamageTypeTags.IS_FREEZING) ? 57 : 2;
         }
-        this.level.broadcastEntityEvent(this, (byte)eventId);
+        this.level().broadcastEntityEvent(this, (byte)eventId);
     }
 
     @Override
@@ -257,7 +250,6 @@ public class GlitchEntity extends PathfinderMob {
         else if (state.getAttackType() == GlitchAttackType.ATTACKER) attackTick();
         
         this.setSpeed(0.3f);
-        this.flyingSpeed = 0.15f;
         Objects.requireNonNull(getAttributes().getInstance(Attributes.ATTACK_DAMAGE), "Attack damage not present").setBaseValue(Double.MAX_VALUE);
         if (this.getY() < holder.getY() && state.getAttackType() != GlitchAttackType.CRASHER) {
             this.setPos(this.getX(), this.getY() + 2.0, this.getZ());
@@ -319,9 +311,14 @@ public class GlitchEntity extends PathfinderMob {
 
     @Override
     public LivingEntity getTarget() {
-        Player entityPlayer = this.level.getNearestPlayer(this, 100.0);
+        Player entityPlayer = this.level().getNearestPlayer(this, 100.0);
         this.setTarget(entityPlayer);
         return entityPlayer;
+    }
+
+    @Override
+    protected float getFlyingSpeed() {
+        return 0.15f;
     }
 }
 

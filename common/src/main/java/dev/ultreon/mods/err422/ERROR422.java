@@ -24,6 +24,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffect;
@@ -58,7 +59,7 @@ public class ERROR422 {
     public static ItemStack recipeReplacement;
 
     public static void init() throws InterruptedException, InvocationTargetException {
-        Optional<HolderSet.Named<Block>> tag = Registry.BLOCK.getTag(ModTags.Blocks.BLOCK_REPLACEMENTS);
+        Optional<HolderSet.Named<Block>> tag = BuiltInRegistries.BLOCK.getTag(ModTags.Blocks.BLOCK_REPLACEMENTS);
         if (tag.isPresent()) {
             for (final Holder<Block> block : tag.get()) {
                 ERROR422.REPLACEMENT_BLOCKS.add(block.value());
@@ -118,7 +119,7 @@ public class ERROR422 {
             );
         });
 
-        for (final Item item : Registry.ITEM.stream().toList()) {
+        for (final Item item : BuiltInRegistries.ITEM.stream().toList()) {
             if (null == item) continue;
             ERROR422.VALID_ITEMS_FOR_RANDOM.add(item);
         }
@@ -178,7 +179,7 @@ public class ERROR422 {
     }
 
     public static List<MobEffect> getEffectiveEffects() {
-        return Collections.unmodifiableList(Registry.MOB_EFFECT.stream().toList());
+        return Collections.unmodifiableList(BuiltInRegistries.MOB_EFFECT.stream().toList());
     }
 
     public static List<Block> getReplacementBlocks() {

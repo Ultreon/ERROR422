@@ -3,6 +3,7 @@ package dev.ultreon.mods.err422.mixin.common;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ultreon.mods.err422.rng.GameRNG;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.renderer.GameRenderer;
@@ -10,6 +11,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.*;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.awt.*;
 
@@ -38,30 +42,22 @@ public abstract class ImageButtonMixin extends AbstractWidget {
      * @author XyperCode
      * @reason Glitchy button.
      */
-    @Override
-    @Overwrite
-    public void renderButton(@NotNull PoseStack poseStack, int i, int j, float f) {
+    @Inject(method = "renderWidget", at = @At("HEAD"), cancellable = true)
+    public void err422$renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick, CallbackInfo ci) {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, this.resourceLocation);
         RenderSystem.setShaderColor(this.err422$randomColor.getRed() / 255f, this.err422$randomColor.getGreen() / 255f, this.err422$randomColor.getBlue() / 255f, this.alpha);
-        int k = this.yTexStart;
-        if (!this.isActive()) {
-            k += this.yDiffTex * 2;
-        } else if (this.isHoveredOrFocused()) {
-            k += this.yDiffTex;
-        }
+
         RenderSystem.enableDepthTest();
         if (isHoveredOrFocused() && active) {
-            int n4 = GameRNG.nextInt(4);
-            int n3 = GameRNG.nextInt(3);
-            n4 = GameRNG.nextInt(2) == 0 ? n4 : -n4;
-            n3 = GameRNG.nextInt(2) == 0 ? n3 : -n3;
-            blit(poseStack, this.x + n4, this.y + n3, this.xTexStart, k, this.width, this.height, this.textureWidth, this.textureHeight);
+            int xOff = GameRNG.nextInt(4);
+            int yOff = GameRNG.nextInt(3);
+            xOff = GameRNG.nextInt(2) == 0 ? xOff : -xOff;
+            yOff = GameRNG.nextInt(2) == 0 ? yOff : -yOff;
+            this.renderTexture(graphics, this.resourceLocation, this.getX() + xOff, this.getY() + yOff, this.xTexStart, this.yTexStart, this.yDiffTex, this.width, this.height, this.textureWidth, this.textureHeight);
+            ci.cancel();
         } else {
-            blit(poseStack, this.x, this.y, this.xTexStart, k, this.width, this.height, this.textureWidth, this.textureHeight);
-        }
-        if (this.isHovered) {
-            this.renderToolTip(poseStack, i, j);
+            this.renderTexture(graphics, this.resourceLocation, this.getX(), this.getY(), this.xTexStart, this.yTexStart, this.yDiffTex, this.width, this.height, this.textureWidth, this.textureHeight);
         }
     }
 }

@@ -36,7 +36,7 @@ dependencies {
     // Remove the next line if you don't want to depend on the API
     modApi("dev.architectury:architectury-forge:${rootProject.architectury_version}")
 
-    modApi("com.ultreon.mods:ultreon-lib-forge:1.1.0") {
+    modApi("dev.ultreon.ultreonlib:ultreon-lib-forge:$ultreonlib_version") {
         exclude group: "org.lwjgl"
         exclude group: "org.lwjgl.lwjgl"
         exclude group: "com.google.code"

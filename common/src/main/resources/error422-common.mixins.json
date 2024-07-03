@@ -13,11 +13,12 @@
     "DebugGuiMixin",
     "GuiMixin",
     "ImageButtonMixin",
-    "accessor.KeyMappingAccessor",
-    "accessor.LoadingOverlayAccessor",
+    "LogoRendererMixin",
     "LogoTextureMixin",
     "TitleScreenMixin",
-    "WindowMixin"
+    "WindowMixin",
+    "accessor.KeyMappingAccessor",
+    "accessor.LoadingOverlayAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

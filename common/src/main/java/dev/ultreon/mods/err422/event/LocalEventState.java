@@ -6,7 +6,6 @@ import dev.ultreon.mods.err422.entity.glitch.GlitchAttackType;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -49,7 +48,7 @@ public class LocalEventState implements EventState<ServerPlayer> {
     }
 
     public ServerLevel getWorld() {
-        return getHolder().getLevel();
+        return getHolder().serverLevel();
     }
 
     public void logAffected(String message) {

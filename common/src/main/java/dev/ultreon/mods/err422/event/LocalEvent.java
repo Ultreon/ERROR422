@@ -13,7 +13,7 @@ public non-sealed abstract class LocalEvent extends GameplayEvent<LocalEventStat
 
     @Override
     final void next(LocalEventState state) {
-        state.timestamps.computeIfAbsent(this, localEvent -> TimeUtils.randomTime(
+        state.timestamps.put(this, TimeUtils.randomTime(
                 this.durationRange.lowerEndpoint(),
                 this.durationRange.upperEndpoint()
         ));

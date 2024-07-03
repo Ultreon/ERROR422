@@ -1,19 +1,14 @@
 package dev.ultreon.mods.err422.mixin.common;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ultreon.mods.err422.rng.GameRNG;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.Widget;
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.narration.NarratableEntry;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
-import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -21,25 +16,13 @@ import org.spongepowered.asm.mixin.Unique;
 
 import java.awt.*;
 
-import static net.minecraft.client.gui.components.AbstractWidget.WIDGETS_LOCATION;
+@Mixin(AbstractButton.class)
+public abstract class AbstractWidgetMixin extends AbstractWidget {
+    @Shadow protected abstract int getTextureY();
 
-@Mixin(AbstractWidget.class)
-public abstract class AbstractWidgetMixin extends GuiComponent implements Widget, GuiEventListener, NarratableEntry {
-    @Shadow protected float alpha;
-
-    @Shadow protected abstract int getYImage(boolean bl);
-
-    @Shadow public abstract boolean isHoveredOrFocused();
-
-    @Shadow public boolean active;
-    @Shadow public int x;
-    @Shadow public int y;
-    @Shadow protected int width;
-    @Shadow protected int height;
-
-    @Shadow protected abstract void renderBg(PoseStack poseStack, Minecraft minecraft, int i, int j);
-
-    @Shadow public abstract Component getMessage();
+    public AbstractWidgetMixin(int x, int y, int width, int height, Component message) {
+        super(x, y, width, height, message);
+    }
 
     @Unique
     private final Color err422$randomColor = new Color(GameRNG.nextInt(140), GameRNG.nextInt(110), GameRNG.nextInt(110));
@@ -49,16 +32,14 @@ public abstract class AbstractWidgetMixin extends GuiComponent implements Widget
      * @reason Glitchy button.
      */
     @Overwrite
-    public void renderButton(@NotNull PoseStack poseStack, int i, int j, float f) {
+    public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         Minecraft minecraft = Minecraft.getInstance();
-        Font font = minecraft.font;
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderTexture(0, WIDGETS_LOCATION);
-        RenderSystem.setShaderColor(this.err422$randomColor.getRed() / 255f, this.err422$randomColor.getGreen() / 255f, this.err422$randomColor.getBlue() / 255f, this.alpha);
-        int k = this.getYImage(this.isHoveredOrFocused());
+        guiGraphics.setColor(1.0F, 1.0F, 1.0F, this.alpha);
         RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
         RenderSystem.enableDepthTest();
+
+        RenderSystem.setShaderColor(this.err422$randomColor.getRed() / 255f, this.err422$randomColor.getGreen() / 255f, this.err422$randomColor.getBlue() / 255f, this.alpha);
+
         int n4 = 0;
         int n3 = 0;
         if (isHoveredOrFocused() && active) {
@@ -66,14 +47,24 @@ public abstract class AbstractWidgetMixin extends GuiComponent implements Widget
             n3 = GameRNG.nextInt(3);
             n4 = GameRNG.nextInt(2) == 0 ? n4 : -n4;
             n3 = GameRNG.nextInt(2) == 0 ? n3 : -n3;
-            this.blit(poseStack, this.x + n4, this.y + n3, 0, 46 + k * 20, this.width / 2, this.height);
-            this.blit(poseStack, this.x + this.width / 2 + n4, this.y + n3, 200 - this.width / 2, 46 + k * 20, this.width / 2, this.height);
+            guiGraphics.blitNineSliced(WIDGETS_LOCATION, this.getX() + n4, this.getY() + n3, this.getWidth(), this.getHeight(), 20, 4, 200, 20, 0, this.getTextureY());
         } else {
-            this.blit(poseStack, this.x, this.y, 0, 46 + k * 20, this.width / 2, this.height);
-            this.blit(poseStack, this.x + this.width / 2, this.y, 200 - this.width / 2, 46 + k * 20, this.width / 2, this.height);
+            guiGraphics.blitNineSliced(WIDGETS_LOCATION, this.getX(), this.getY(), this.getWidth(), this.getHeight(), 20, 4, 200, 20, 0, this.getTextureY());
         }
-        this.renderBg(poseStack, minecraft, i, j);
-        int l = this.active ? 0xFFFFFF : 0xA0A0A0;
-        AbstractWidget.drawCenteredString(poseStack, font, this.getMessage(), this.x + this.width / 2 + n4, this.y + (this.height - 8) / 2 + n3, l | Mth.ceil(this.alpha * 255.0f) << 24);
+        guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+        int i = this.active ? 16777215 : 10526880;
+        this.err422$renderString(guiGraphics, minecraft.font, i | Mth.ceil(this.alpha * 255.0F) << 24, n4, n3);
+    }
+
+    @Unique
+    public void err422$renderString(GuiGraphics guiGraphics, Font font, int color, int xOff, int yOff) {
+        this.err422$renderScrollingString(guiGraphics, font, xOff, yOff, color);
+    }
+
+    @Unique
+    protected void err422$renderScrollingString(GuiGraphics guiGraphics, Font font, int xOff, int yOff, int color) {
+        int i = this.getX() + 2;
+        int j = this.getX() + this.getWidth() - 2;
+        renderScrollingString(guiGraphics, font, this.getMessage(), i + xOff, this.getY() + yOff, j + xOff, this.getY() + this.getHeight() +  yOff, color);
     }
 }

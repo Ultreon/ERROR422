@@ -5,7 +5,7 @@ plugins {
 }
 
 architectury {
-    minecraft = rootProject.minecraft_version
+    minecraft = minecraft_version
 }
 
 forgix {
@@ -62,6 +62,11 @@ subprojects {
         }
 
         maven {
+            name = 'ParchmentMC'
+            url = 'https://maven.parchmentmc.org'
+        }
+
+        maven {
             name "Jitpack"
             url "https://jitpack.io"
         }
@@ -74,9 +79,10 @@ subprojects {
     dependencies {
         minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
         // The following line declares the mojmap mappings, you may use other mappings as well
-        mappings loom.officialMojangMappings()
-        // The following line declares the yarn mappings you may select this one as well.
-        // mappings "net.fabricmc:yarn:@YARN_MAPPINGS@:v2"
+        mappings loom.layered() {
+            officialMojangMappings()
+            parchment("org.parchmentmc.data:parchment-1.20.1:2023.09.03@zip")
+        }
     }
 }
 
@@ -85,9 +91,9 @@ allprojects {
     apply plugin: "architectury-plugin"
     apply plugin: "maven-publish"
 
-    archivesBaseName = rootProject.archives_base_name
-    version = rootProject.mod_version
-    group = rootProject.maven_group
+    archivesBaseName = archives_base_name
+    version = mod_version
+    group = maven_group
 
     repositories {
         // Add repositories to retrieve artifacts from in here.
@@ -95,6 +101,10 @@ allprojects {
         // Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
         // See https://docs.gradle.org/current/userguide/declaring_repositories.html
         // for more information about repositories.
+
+        maven { url "https://jitpack.io/"}
+        maven { url "https://maven.terraformersmc.com/releases" }
+        maven { url "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/" }
     }
 
     tasks.withType(JavaCompile) {
