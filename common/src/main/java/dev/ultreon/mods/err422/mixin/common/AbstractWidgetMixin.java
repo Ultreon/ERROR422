@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.Unique;
 
 import java.awt.*;
 
-@Mixin(AbstractButton.class)
+@Mixin(value = AbstractButton.class, priority = 10000)
 public abstract class AbstractWidgetMixin extends AbstractWidget {
     @Shadow protected abstract int getTextureY();
 
