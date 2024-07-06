@@ -19,6 +19,7 @@
     "TitleScreenMixin",
     "WindowMixin"
   ],
+  "plugin": "dev.ultreon.mods.err422.ERROR422MixinPlugin",
   "injectors": {
     "defaultRequire": 1
   }
